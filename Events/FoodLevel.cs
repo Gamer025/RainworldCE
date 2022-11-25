@@ -18,6 +18,7 @@ namespace RainWorldCE.Events
             _description = "Nobody truely knows how Slugcats digest food internally";
             _activeTime = 10;
             _repeatEverySec = 3;
+            _allowMultiple = true;
         }
 
         public override void RecurringTrigger()

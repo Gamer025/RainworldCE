@@ -50,12 +50,12 @@ namespace RainWorldCE.Config
             Tabs[0].AddItems(new OpSlider(new Vector2(140f, 455f), "maxEventCount", new RWCustom.IntVector2(1, 200), defaultValue: 200)
             { description = "Maximum amount of chaos events to trigger per ingame cycle." });
             //Event time multiplier
-            Tabs[0].AddItems(new OpLabel(10f, 420f, "Event duration multiplier (base is 5):")
+            Tabs[0].AddItems(new OpLabel(10f, 420f, "Event duration multiplier (base is 10):")
             {
                 description = "Allows you to decrase/increase the length of some time based events.\r\n" +
             "5 is normal event length, 1 would be 5 times shorter, 50 would be 10 times longer events."
             });
-            Tabs[0].AddItems(new OpSlider(new Vector2(220f, 415f), "eventDurationMult", new RWCustom.IntVector2(1, 50), 300, defaultValue: 5)
+            Tabs[0].AddItems(new OpSlider(new Vector2(220f, 415f), "eventDurationMult", new RWCustom.IntVector2(1, 50), 300, defaultValue: 10)
             {
                 description = "Allows you to decrase/increase the length of some time based events.\r\n" +
             "5 is normal event length, 1 would be 5 times shorter, 50 would be 10 times longer events."
@@ -122,7 +122,7 @@ namespace RainWorldCE.Config
             RainWorldCE.eventTimeout = int.Parse(config["eventTimer"]);
             RainWorldCE.maxEventCount = int.Parse(config["maxEventCount"]);
             RainWorldCE.showActiveEvents = bool.Parse(config["showActiveEvents"]);
-            RainWorldCE.eventDurationMult = float.Parse(config["eventDurationMult"]) / 5;
+            RainWorldCE.eventDurationMult = float.Parse(config["eventDurationMult"]) / 10;
 
             //Config field for events to pull from via GetConfig
             CEEvent.config = config;

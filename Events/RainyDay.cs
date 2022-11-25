@@ -23,8 +23,8 @@ namespace RainWorldCE.Events
 
         public override void RecurringTrigger()
         {
-            //Forward time by 10% of the remaining time 10 times
-            game.world.rainCycle.timer = (int)Mathf.Lerp(game.world.rainCycle.timer, game.world.rainCycle.cycleLength, 0.1f);
+            //Forward time by 7% of the remaining time 10 times
+            game.world.rainCycle.timer = (int)Mathf.Lerp(game.world.rainCycle.timer, game.world.rainCycle.cycleLength, 0.07f);
         }
     }
 }

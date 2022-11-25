@@ -86,6 +86,7 @@ namespace RainWorldCE.Events
         {
             RainWorldCE.ME.Logger_p.Log(LogLevel.Error, $"Abstract event StartupTrigger called by {GetType().Name}!");
         }
+
         /// <summary>
         /// Executed when the event is being removed from the active event pool
         /// </summary>
@@ -94,6 +95,7 @@ namespace RainWorldCE.Events
         {
             RainWorldCE.ME.Logger_p.Log(LogLevel.Error, $"Abstract event ShutdownTrigger called by {GetType().Name}!");
         }
+
         /// <summary>
         /// Executed every <see cref="RepeatEverySec">repeatEverySec</see> seconds
         /// </summary>
@@ -101,6 +103,7 @@ namespace RainWorldCE.Events
         {
             RainWorldCE.ME.Logger_p.Log(LogLevel.Error, $"Abstract event RecurringTrigger called by {GetType().Name}!");
         }
+
         /// <summary>
         /// Executed when room is about to change (SuckInCreature to be exact)
         /// </summary>
@@ -109,6 +112,9 @@ namespace RainWorldCE.Events
             RainWorldCE.ME.Logger_p.Log(LogLevel.Error, $"Abstract event PlayerChangingRoomTrigger called by {GetType().Name}!");
         }
 
+        /// <summary>
+        /// Executed when the player changed room (RoomCamera.ChangeRoom to be exact)
+        /// </summary>
         public virtual void PlayerChangedRoomTrigger(ref RoomCamera self, ref Room room, ref int camPos)
         {
             RainWorldCE.ME.Logger_p.Log(LogLevel.Error, $"Abstract event PlayerChangedRoomTrigger called by {GetType().Name}!");
@@ -116,6 +122,11 @@ namespace RainWorldCE.Events
 
         #endregion
 
+        /// <summary>
+        /// Create an log entry for your event
+        /// </summary>
+        /// <param name="level">The log level </param>
+        /// <param name="message">Message to print/log</param>
         protected void WriteLog(LogLevel level, string message)
         {
             RainWorldCE.ME.Logger_p.Log(LogLevel.Debug, $"[{GetType().Name}] {message}");

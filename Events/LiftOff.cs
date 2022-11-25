@@ -18,6 +18,7 @@ namespace RainWorldCE.Events
             _description = "in T-10 seconds";
             _activeTime = 30;
             _repeatEverySec = 10;
+            _allowMultiple = true;
         }
 
         public override void RecurringTrigger()
