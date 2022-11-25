@@ -158,8 +158,8 @@ namespace RainWorldCE.Events
         /// Tries to get the specified config as bool, returns false on error/if config does not exist
         /// </summary>
         /// <param name="key"></param>
-        /// <returns>Config as bool, false on error/null</returns>
-        protected int TryGetConfigAsInt<T>(string key)
+        /// <returns>Config as int, 0 on error/null</returns>
+        protected int TryGetConfigAsInt(string key)
         {
             config.TryGetValue($"EC_{GetType().Name}_{key}", out string configResult);
             int.TryParse(configResult, out int result);
