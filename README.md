@@ -7,7 +7,7 @@ The extensive ConfigMachine integration allows you to configure the mod extensiv
 Installing RainworldCE is as easy as downloading the latest .zip from https://github.com/Gamer025/RainworldCE/releases  
 Then place the contained .dll in your BepinEx plugin folder / add it to your mod manager.  
 ConfigMachine is recommended but the mod will also work without it, using default parameters.  
-It's however heavily recommened to install CM to acces RainworldCEs extensive config options.  
+It's however heavily recommened to install CM to access RainworldCEs extensive config options.  
 Read the contained readme.txt for more version specific information or check out the [Players readme](/Docs/players.md)
 
 ### Compiling

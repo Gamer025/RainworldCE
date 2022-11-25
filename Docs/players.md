@@ -5,15 +5,18 @@ This readme contains several kinds of information about RainworldCEs config opti
 **Duration between events**  
 Determines how often events will generate in seconds.  
 Default: 60 seconds  
+
 **Don't repeat events for (%)**  
 Did you know that pure randomness can be pretty repetitive? This prevents that.  
 Whenever a events gets choosen it will be blocked for X other events.  
 This slider determines that value, if you have 10 events enabled and set the percentage to 50% then an event would be blocked for 5 guranteed other events.  
-Default: 50%  
+Default: 50%
+  
 **Max events per cycle**  
 Determines how many events should trigger per ingame cycle.  
 Pretty useful if you for example only want to trigger one event at the start of the game.  
 Default: 200 events  
+
 **Event duration multiplier (base is 10)**  
 Ok this one requires a bit of math.  
 By default most active events will last for 2 minutes. This options lets you increase/decrease that time for some events.  
@@ -21,6 +24,7 @@ If you set the slider to 10 all events will have their default length.
 If you set it to 1 all events would be 10 times shorter
 If you were to set it to 50 all events would be 5 times longer.  
 Default: 10  
+
 **Show active events**  
 Determines if active events (events with a timer) will be displayed in the bottom left.  
 Default: Yes
