@@ -1,4 +1,5 @@
 # Rain World: Chaos Edition
+![Rainworld C E](Docs/RainworldCE.png)  
 Rain World: Chaos Edition (RainworldCE) is a BepinEx mod for Rain World 1.5.
 It adds random events to the story mode making every cycle potentially more chaotic.
 This ranges from negative to neutral to positive events.  
