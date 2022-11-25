@@ -13,7 +13,7 @@ using RainWorldCE.Attributes;
 
 namespace RainWorldCE;
 
-[BepInPlugin("Gamer025.RainworldCE", "Rain World Chaos Edition", "0.1.0")]
+[BepInPlugin("Gamer025.RainworldCE", "Rain World Chaos Edition", "1.0.0")]
 public class RainWorldCE : BaseUnityPlugin
 {
     /// <summary>
@@ -336,8 +336,6 @@ public class RainWorldCE : BaseUnityPlugin
     void RainWorldGameCtorHook(On.RainWorldGame.orig_ctor orig, RainWorldGame self, ProcessManager manager)
     {
         orig(self, manager);
-        //TODO: Remove
-        manager.rainWorld.buildType = RainWorld.BuildType.Development;
         RainWorldCE.ME.Logger_p.Log(LogLevel.Info, $"Starting event cycle with {eventTimeout} second timer");
         ResetState();
         CEEvent.game = self;
