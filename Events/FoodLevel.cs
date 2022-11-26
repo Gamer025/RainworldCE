@@ -26,6 +26,8 @@ namespace RainWorldCE.Events
             //Add or remove 1 Food pip 3 times
             int[] possibleValues = new int[2] { -1, 1 };
             int result = possibleValues[rnd.Next(possibleValues.Length)];
+            //AddFood has protection against going over max but not for negatives
+            if (result < 0 && (helper.MainPlayer.realizedCreature as Player).FoodInStomach == 0) return;
             (helper.MainPlayer.realizedCreature as Player).AddFood(result);
             if (result < 0)
             {
