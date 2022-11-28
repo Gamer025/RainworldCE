@@ -13,7 +13,7 @@ using RainWorldCE.Attributes;
 
 namespace RainWorldCE;
 
-[BepInPlugin("Gamer025.RainworldCE", "Rain World Chaos Edition", "1.0.2")]
+[BepInPlugin("Gamer025.RainworldCE", "Rain World Chaos Edition", "1.0.3")]
 public class RainWorldCE : BaseUnityPlugin
 {
     /// <summary>
