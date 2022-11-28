@@ -53,12 +53,12 @@ namespace RainWorldCE.Config
             Tabs[0].AddItems(new OpLabel(10f, 420f, "Event duration multiplier (base is 10):")
             {
                 description = "Allows you to decrase/increase the length of some time based events.\r\n" +
-            "5 is normal event length, 1 would be 5 times shorter, 50 would be 10 times longer events."
+            "10 is normal event length, 1 would be 10 times shorter, 50 would be 5 times longer events."
             });
             Tabs[0].AddItems(new OpSlider(new Vector2(220f, 415f), "eventDurationMult", new RWCustom.IntVector2(1, 50), 300, defaultValue: 10)
             {
                 description = "Allows you to decrase/increase the length of some time based events.\r\n" +
-            "5 is normal event length, 1 would be 5 times shorter, 50 would be 10 times longer events."
+            "10 is normal event length, 1 would be 10 times shorter, 50 would be 5 times longer events."
             });
             //Show active events checkbox
             Tabs[0].AddItems(new OpCheckBox(new Vector2(10f, 390f), "showActiveEvents", defaultBool: true)
