@@ -78,9 +78,7 @@ namespace RainWorldCE.Events
                 movingTo.AddEntity(newCreature);
                 newCreature.Realize();
                 newCreature.realizedCreature.PlaceInRoom(room);
-                //room.RemoveObject(oldCreature.realizedCreature);
                 oldCreature.realizedCreature.Destroy();
-                //oldCreature.Destroy();
             }
         }
     }
