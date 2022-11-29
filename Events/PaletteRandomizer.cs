@@ -11,9 +11,9 @@ namespace RainWorldCE.Events
     /// <summary>
     /// Randomizes the primary color palette
     /// </summary>
-    internal class ColorPalettePixelRandomize : CEEvent
+    internal class PaletteRandomizer : CEEvent
     {
-        public ColorPalettePixelRandomize()
+        public PaletteRandomizer()
         {
             _name = "Too many mushrooms";
             _description = "Apparently taking too many of these can have side effects after all";
@@ -33,6 +33,7 @@ namespace RainWorldCE.Events
         public override void PlayerChangedRoomTrigger(ref RoomCamera self, ref Room room, ref int camPos)
         {
             int chance = TryGetConfigAsInt("chance");
+            WriteLog(LogLevel.Debug, $"Chance {chance}");
             backupPalette = new Texture2D(self.fadeTexA.width, self.fadeTexA.height);
             backupPalette.SetPixels(self.fadeTexA.GetPixels());
             Texture2D texture = new Texture2D(32, 16, TextureFormat.ARGB32, false)
@@ -74,7 +75,7 @@ namespace RainWorldCE.Events
             {
                 List<EventConfigEntry> options = new List<EventConfigEntry>
                 {
-                    new IntegerConfigEntry("Intensity", "How badly the palette will be randomized", "chance", new RWCustom.IntVector2(0, 100), this)
+                    new IntegerConfigEntry("Intensity", "How badly the palette will be randomized", "chance", new RWCustom.IntVector2(10, 100), 25, this)
                 };
                 return options;
             }

@@ -64,7 +64,7 @@ namespace RainWorldCE.Events
             get
             {
                 List<EventConfigEntry> options = new List<EventConfigEntry>();
-                options.Add(new BooleanConfigEntry("Restore connections?", "Restore room connection at end of event?", "restoreConnections", this));
+                options.Add(new BooleanConfigEntry("Restore connections?", "Restore room connection at end of event?", "restoreConnections", false, this));
                 return options;
             }
         }

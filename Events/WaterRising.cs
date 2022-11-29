@@ -80,7 +80,7 @@ namespace RainWorldCE.Events
             {
                 List<EventConfigEntry> options = new List<EventConfigEntry>
                 {
-                    new BooleanConfigEntry("Restore water levels?", "Restore water levels at end of event?", "restoreWater", this)
+                    new BooleanConfigEntry("Restore water levels?", "Restore water levels at end of event?", "restoreWater", false, this)
                 };
                 return options;
             }

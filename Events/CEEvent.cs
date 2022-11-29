@@ -143,7 +143,7 @@ namespace RainWorldCE.Events
         }
 
         /// <summary>
-        /// Tries to get the specified config as bool, returns false on error/if config does not exist
+        /// Tries to get the specified config as bool, returns if config does not exist
         /// </summary>
         /// <param name="key"></param>
         /// <returns>Config as bool, false on error/null</returns>
@@ -155,7 +155,7 @@ namespace RainWorldCE.Events
         }
 
         /// <summary>
-        /// Tries to get the specified config as bool, returns false on error/if config does not exist
+        /// Tries to get the specified config as bool, returns default if config does not exist
         /// </summary>
         /// <param name="key"></param>
         /// <returns>Config as int, 0 on error/null</returns>

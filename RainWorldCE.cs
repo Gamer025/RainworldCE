@@ -13,7 +13,7 @@ using RainWorldCE.Attributes;
 
 namespace RainWorldCE;
 
-[BepInPlugin("Gamer025.RainworldCE", "Rain World Chaos Edition", "1.0.3")]
+[BepInPlugin("Gamer025.RainworldCE", "Rain World Chaos Edition", "1.0.4")]
 public class RainWorldCE : BaseUnityPlugin
 {
     /// <summary>
@@ -202,7 +202,7 @@ public class RainWorldCE : BaseUnityPlugin
             //Disalbe CE since we have nothign to do
             return eventClass;
         }
-       
+
         eventClass = allowedEvents[rnd.Next(allowedEvents.Count)];
         //Should fill up the array and then start overwriting the oldest blocked event
         if (blockedEvents.Length > 0)
@@ -227,6 +227,20 @@ public class RainWorldCE : BaseUnityPlugin
             }
         }
     }
+
+    /// <summary>
+    /// Add default values to CEEvents config if no value provided by CM
+    /// </summary>
+    private void GenerateDefaultConfigs()
+    {
+        List<CEEvent> events = GetAllCEEventTypes().Select(x => (CEEvent)Activator.CreateInstance(x)).OrderBy(e => e.Name).ToList();
+        //Add to config if key not already exist
+        foreach (var entry in events.SelectMany(ceevent => ceevent.ConfigEntries.Where(entry => !CEEvent.config.ContainsKey(entry.Key))))
+        {
+            CEEvent.config.Add(entry.Key, entry.DefaultValue);
+        }
+    }
+
 
     /// <summary>
     /// Runs every second and triggers new chaos events / RecurringTrigger methods and expiring events 
@@ -342,6 +356,8 @@ public class RainWorldCE : BaseUnityPlugin
         game = self;
         CEEvent.helper = new EventHelpers(self);
         gameRunning = true;
+        //At this point CM should have defenitly loaded its config if it exists, so its safe to add defaults now
+        GenerateDefaultConfigs();
     }
 
     void RainWorldGameExitGameHook(On.RainWorldGame.orig_ExitGame orig, RainWorldGame self, bool asDeath, bool asQuit)

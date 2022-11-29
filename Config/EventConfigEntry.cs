@@ -9,10 +9,6 @@ using UnityEngine;
 
 namespace RainWorldCE.Config
 {
-    enum ConfigType
-    {
-        boolean
-    }
 
     public abstract class EventConfigEntry
     {
@@ -39,7 +35,10 @@ namespace RainWorldCE.Config
         /// How much space (height) this element will take in the UI
         /// </summary>
         public abstract int size { get; }
-
+        /// <summary>
+        /// Value in case CM did not provide any user set value
+        /// </summary>
+        public string DefaultValue { get; set; }
 
         public abstract Collection<UIelement> CMelement(Vector2 pos);
     }
