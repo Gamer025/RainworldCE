@@ -27,7 +27,7 @@ public class RainWorldCE : BaseUnityPlugin
     /// <summary>
     /// Time between chaos events (CM)
     /// </summary>
-    public static int eventTimeout = 10;
+    public static int eventTimeout = 60;
     /// <summary>
     /// CEHUD which contains the labels for new events happening and active events
     /// </summary>
