@@ -20,13 +20,13 @@ namespace RainWorldCE.Events
 
         public override void StartupTrigger()
         {
-            foreach (AbstractRoom room in helper.AllRegionRooms)
+            foreach (AbstractRoom room in EventHelpers.AllRegionRooms)
             {
                 foreach (AbstractCreature creature in room.creatures)
                 {
                     if (creature.abstractAI != null)
                     {
-                        creature.abstractAI.SetDestination(helper.MainPlayer.pos);
+                        creature.abstractAI.SetDestination(EventHelpers.MainPlayer.pos);
                     }
                 }
             }

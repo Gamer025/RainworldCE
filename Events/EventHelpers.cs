@@ -12,14 +12,8 @@ namespace RainWorldCE.Events
     /// <summary>
     /// Helper methods for event related stuff
     /// </summary>
-    public class EventHelpers
+    public static class EventHelpers
     {
-        private readonly RainWorldGame game;
-
-        public EventHelpers(RainWorldGame game)
-        {
-            this.game = game;
-        }
 
         /// <summary>
         /// Creates a instance of every event and pulls out its name
@@ -37,25 +31,34 @@ namespace RainWorldCE.Events
             return returnList;
         }
 
-        internal AbstractRoom RandomRegionRoom
+        /// <summary>
+        /// Gets a random abstract room in the current region
+        /// </summary>
+        /// <param name="onlySafeRooms">Only return safe rooms (no offScreenDens, Gates or Rooms without connections)</param>
+        /// <returns>Abstract room from the current region</returns>
+        internal static AbstractRoom RandomRegionRoom(bool onlySafeRooms = true)
         {
-            get
+            bool foundValidRoom = false;
+            AbstractRoom aRoom = null;
+            while (!foundValidRoom)
             {
-                //Last room should be offscreenDen so -1
-                int roomID = CEEvent.rnd.Next(game.world.firstRoomIndex, game.world.firstRoomIndex + game.world.NumberOfRooms-1);
-                AbstractRoom aRoom = CEEvent.game.world.GetAbstractRoom(roomID);
-                return aRoom;
+                int roomID = CEEvent.rnd.Next(CEEvent.game.world.firstRoomIndex, CEEvent.game.world.firstRoomIndex + CEEvent.game.world.NumberOfRooms);
+                aRoom = CEEvent.game.world.GetAbstractRoom(roomID);
+                //Room is always valid if onlySafeRooms false or room has connections and is not gate or offScreenDen
+                foundValidRoom = !onlySafeRooms || (!aRoom.offScreenDen && aRoom.connections.Length > 0 && !aRoom.name.Contains("GATE"));
             }
+            return aRoom;
         }
+
         /// <summary>
         /// Returns the first player in game.players
         /// </summary>
         /// <returns></returns>
-        internal AbstractCreature MainPlayer
+        internal static AbstractCreature MainPlayer
         {
             get
             {
-                return game.Players[0];
+                return CEEvent.game.Players[0];
             }
         }
 
@@ -63,15 +66,15 @@ namespace RainWorldCE.Events
         /// Returns all players in game.players
         /// </summary>
         /// <returns></returns>
-        internal Collection<AbstractCreature> AllPlayers
+        internal static Collection<AbstractCreature> AllPlayers
         {
             get
             {
-                return new Collection<AbstractCreature>(game.Players);
+                return new Collection<AbstractCreature>(CEEvent.game.Players);
             }
         }
 
-        internal AbstractRoom CurrentRoom
+        internal static AbstractRoom CurrentRoom
         {
             get
             {
@@ -79,35 +82,35 @@ namespace RainWorldCE.Events
             }
         }
 
-        internal Collection<AbstractRoom> AllRegionRooms
+        internal static Collection<AbstractRoom> AllRegionRooms
         {
             get
             {
                 Collection<AbstractRoom> rooms = new Collection<AbstractRoom>();
-                for (int roomID = game.world.NumberOfRooms - 1; roomID >= 0; roomID--)
+                for (int roomID = CEEvent.game.world.NumberOfRooms - 1; roomID >= 0; roomID--)
                 {
-                    rooms.Add(game.world.GetAbstractRoom(roomID + game.world.firstRoomIndex));
+                    rooms.Add(CEEvent.game.world.GetAbstractRoom(roomID + CEEvent.game.world.firstRoomIndex));
                 }
                 return rooms;
             }
         }
 
-        internal List<AbstractRoom> GetConnectedRooms(AbstractRoom room)
+        internal static List<AbstractRoom> GetConnectedRooms(AbstractRoom room)
         {
             List<AbstractRoom> returnList = new List<AbstractRoom>();
             foreach (var destRoomNumber in room.connections)
             {
-                if (destRoomNumber > 1) returnList.Add(game.world.GetAbstractRoom(destRoomNumber));
+                if (destRoomNumber > 1) returnList.Add(CEEvent.game.world.GetAbstractRoom(destRoomNumber));
             }
             return returnList;
         }
 
-        internal int GetNodeIdOfRoomConnection(AbstractRoom source, AbstractRoom destination)
+        internal static int GetNodeIdOfRoomConnection(AbstractRoom source, AbstractRoom destination)
         {
             return Array.IndexOf(destination.connections, source.index);
         }
 
-        internal void MakeCreatureAttackCreature(AbstractCreature attacker, AbstractCreature target)
+        internal static void MakeCreatureAttackCreature(AbstractCreature attacker, AbstractCreature target)
         {
             attacker.state.socialMemory.GetOrInitiateRelationship(target.ID).like = -1f;
             attacker.state.socialMemory.GetOrInitiateRelationship(target.ID).tempLike = -1f;
@@ -117,14 +120,14 @@ namespace RainWorldCE.Events
             attacker.abstractAI.followCreature = target;
         }
 
-        internal void MakeCreatureLikeAndFollowCreature(AbstractCreature friend, AbstractCreature target)
+        internal static void MakeCreatureLikeAndFollowCreature(AbstractCreature friend, AbstractCreature target)
         {
             friend.state.socialMemory.GetOrInitiateRelationship(target.ID).like = 1f;
             friend.state.socialMemory.GetOrInitiateRelationship(target.ID).tempLike = 1f;
             friend.abstractAI.followCreature = target;
         }
 
-        internal bool RoomHasEffect(Room room, RoomSettings.RoomEffect.Type type)
+        internal static bool RoomHasEffect(Room room, RoomSettings.RoomEffect.Type type)
         {
             foreach (RoomSettings.RoomEffect effect in room.roomSettings.effects)
             {
@@ -134,6 +137,14 @@ namespace RainWorldCE.Events
                 }
             }
             return false;
+        }
+
+        internal static bool StoryModeActive
+        {
+            get
+            {
+                return (CEEvent.game is not null && CEEvent.game.IsStorySession);
+            }
         }
     }
 }

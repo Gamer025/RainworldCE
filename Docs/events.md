@@ -9,6 +9,7 @@ All events should be located in the Events folder and RainworldCE.Events namespa
 An event consists of certain fields/properties that describe it and its behavior. By overriding trigger methods an event can react to predefined situations.  
 You will want to set the necessary fields in your events constructor and then override whichever methods/triggers to which you want to react to.  
 Don't perform any game related actions in your constructor, there are multiple cases where instances of your event will be created while the game is not active. Use `StartupTrigger` instead.  
+Otherwise use the storyModeActive EventHelper to check if the game is active if you need to get/generate data on event construction. However make sure to not modify the games state as construction doesn't necessarily mean your even it active!  
 The EventHelpers class contains multiple useful properties and methods that you can use in your events.  
 Use the `game` field to access RainworldGame, which contains stuff like the world etc.
 

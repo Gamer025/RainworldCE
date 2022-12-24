@@ -65,7 +65,6 @@ namespace RainWorldCE.Events
         //Fields you can use in your event, don't modify these
         public static RainWorldGame game;
         public static readonly Random rnd = new Random();
-        public static EventHelpers helper;
         #endregion
 
         #region internalFields

@@ -17,7 +17,7 @@ namespace RainWorldCE.Events
         {
             size = GetRandomGiftSize;
             _name = "A small/normal/great gift";
-            if (game is not null)
+            if (EventHelpers.StoryModeActive)
             {
                 _name = $"A {size} gift";
             }
@@ -41,7 +41,7 @@ namespace RainWorldCE.Events
 
         public override void StartupTrigger()
         {
-            foreach (AbstractCreature player in helper.AllPlayers)
+            foreach (AbstractCreature player in EventHelpers.AllPlayers)
             {
                 AbstractPhysicalObject reward;
                 switch (size)
@@ -98,7 +98,7 @@ namespace RainWorldCE.Events
 
                 WriteLog(LogLevel.Debug, $"Gift reward is {reward}");
                 reward.Realize();
-                reward.realizedObject.PlaceInRoom(helper.CurrentRoom.realizedRoom);
+                reward.realizedObject.PlaceInRoom(EventHelpers.CurrentRoom.realizedRoom);
             }
             
         }

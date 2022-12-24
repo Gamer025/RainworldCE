@@ -27,7 +27,7 @@ namespace RainWorldCE.Events
             while (rnd.Next(100) < chance)
             {
 
-                AbstractRoom aRoom = helper.RandomRegionRoom;
+                AbstractRoom aRoom = EventHelpers.RandomRegionRoom();
                 for (int count = rnd.Next(2, 5); count > 0; count--)
                 {
                     //Spawn the scavs in the worlds offscreenDen so that they get equipped with gear, then move them to the choosen room

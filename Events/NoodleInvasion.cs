@@ -20,7 +20,7 @@ namespace RainWorldCE.Events
         {
             float chance = 100;
             float interpolation = 0.1f;
-            List<AbstractRoom> adjancedRooms = helper.GetConnectedRooms(helper.CurrentRoom);
+            List<AbstractRoom> adjancedRooms = EventHelpers.GetConnectedRooms(EventHelpers.CurrentRoom);
             foreach (AbstractRoom room in adjancedRooms)
             {
                 chance = UnityEngine.Mathf.Lerp(chance, 0f, interpolation);
@@ -28,15 +28,15 @@ namespace RainWorldCE.Events
                 WriteLog(LogLevel.Debug, $"Chance now {chance}");
                 if (rnd.Next(100) < chance)
                 {
-                    int destRoomNodeId = helper.GetNodeIdOfRoomConnection(room, helper.CurrentRoom);
+                    int destRoomNodeId = EventHelpers.GetNodeIdOfRoomConnection(room, EventHelpers.CurrentRoom);
                     WriteLog(LogLevel.Debug, $"Spawned noodles in {room.name}");
                     AbstractCreature creature1 = new AbstractCreature(game.world, StaticWorld.GetCreatureTemplate(CreatureTemplate.Type.SmallNeedleWorm), null, new WorldCoordinate(room.index, -1, -1, 0), game.GetNewID());
                     AbstractCreature creature2 = new AbstractCreature(game.world, StaticWorld.GetCreatureTemplate(CreatureTemplate.Type.SmallNeedleWorm), null, new WorldCoordinate(room.index, -1, -1, 0), game.GetNewID());
                     AbstractCreature creature3 = new AbstractCreature(game.world, StaticWorld.GetCreatureTemplate(CreatureTemplate.Type.BigNeedleWorm), null, new WorldCoordinate(room.index, -1, -1, 0), game.GetNewID());
-                    helper.MakeCreatureAttackCreature(creature3, helper.MainPlayer);
-                    creature1.ChangeRooms(new WorldCoordinate(helper.CurrentRoom.index, -1, -1, destRoomNodeId));
-                    creature2.ChangeRooms(new WorldCoordinate(helper.CurrentRoom.index, -1, -1, destRoomNodeId));
-                    creature3.ChangeRooms(new WorldCoordinate(helper.CurrentRoom.index, -1, -1, destRoomNodeId));
+                    EventHelpers.MakeCreatureAttackCreature(creature3, EventHelpers.MainPlayer);
+                    creature1.ChangeRooms(new WorldCoordinate(EventHelpers.CurrentRoom.index, -1, -1, destRoomNodeId));
+                    creature2.ChangeRooms(new WorldCoordinate(EventHelpers.CurrentRoom.index, -1, -1, destRoomNodeId));
+                    creature3.ChangeRooms(new WorldCoordinate(EventHelpers.CurrentRoom.index, -1, -1, destRoomNodeId));
                 }
             }
         }

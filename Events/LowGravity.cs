@@ -22,7 +22,7 @@ namespace RainWorldCE.Events
 
         public override void StartupTrigger()
         {
-            AddZeroGToRoom(helper.CurrentRoom.realizedRoom);
+            AddZeroGToRoom(EventHelpers.CurrentRoom.realizedRoom);
         }
         public override void PlayerChangedRoomTrigger(ref RoomCamera self, ref Room room, ref int camPos)
         {
@@ -32,8 +32,8 @@ namespace RainWorldCE.Events
         private void AddZeroGToRoom(Room room)
         {
             //Only rooms without special gravity
-            if (helper.RoomHasEffect(room, RoomSettings.RoomEffect.Type.ZeroG)
-                || helper.RoomHasEffect(room, RoomSettings.RoomEffect.Type.BrokenZeroG)
+            if (EventHelpers.RoomHasEffect(room, RoomSettings.RoomEffect.Type.ZeroG)
+                || EventHelpers.RoomHasEffect(room, RoomSettings.RoomEffect.Type.BrokenZeroG)
                 || affectedRooms.ContainsKey(room)) return;
 
             affectedRooms.Add(room, room.gravity);

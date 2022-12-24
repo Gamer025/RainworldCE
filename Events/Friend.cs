@@ -19,10 +19,10 @@ namespace RainWorldCE.Events
 
         public override void StartupTrigger()
         {
-            AbstractCreature creature = new AbstractCreature(game.world, StaticWorld.GetCreatureTemplate(PickLizardType), null, helper.MainPlayer.pos, game.GetNewID());
-            helper.MakeCreatureLikeAndFollowCreature(creature, helper.MainPlayer);
+            AbstractCreature creature = new AbstractCreature(game.world, StaticWorld.GetCreatureTemplate(PickLizardType), null, EventHelpers.MainPlayer.pos, game.GetNewID());
+            EventHelpers.MakeCreatureLikeAndFollowCreature(creature, EventHelpers.MainPlayer);
             creature.Realize();
-            creature.realizedCreature.PlaceInRoom(helper.CurrentRoom.realizedRoom);
+            creature.realizedCreature.PlaceInRoom(EventHelpers.CurrentRoom.realizedRoom);
         }
 
         CreatureTemplate.Type PickLizardType

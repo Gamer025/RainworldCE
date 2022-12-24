@@ -19,7 +19,7 @@ namespace RainWorldCE.Events
 
         public override void StartupTrigger()
         {
-            AbstractRoom aRoom = helper.RandomRegionRoom;
+            AbstractRoom aRoom = EventHelpers.RandomRegionRoom();
             AbstractCreature creature = new AbstractCreature(game.world, StaticWorld.GetCreatureTemplate(CreatureTemplate.Type.RedLizard), null, new WorldCoordinate(aRoom.index, -1, -1, 0), game.GetNewID());
             creature.ChangeRooms(new WorldCoordinate(aRoom.index, -1, -1, 0));
             WriteLog(LogLevel.Debug, $"Spawned {creature} in {aRoom.name}");

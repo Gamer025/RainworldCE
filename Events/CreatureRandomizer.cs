@@ -69,7 +69,7 @@ namespace RainWorldCE.Events
             for (int i = movingTo.creatures.Count - 1; i >= 0; i--)
             {
                 AbstractCreature oldCreature = movingTo.creatures[i];
-                if (oldCreature.creatureTemplate.type is CreatureTemplate.Type.Slugcat or CreatureTemplate.Type.Overseer) continue;
+                if (oldCreature.creatureTemplate.type is CreatureTemplate.Type.Slugcat or CreatureTemplate.Type.Overseer or CreatureTemplate.Type.Deer) continue;
 
                 WriteLog(LogLevel.Debug, $"Found {oldCreature} , pos: {oldCreature.pos}");
                 CreatureTemplate.Type type = (CreatureTemplate.Type)possibleCreatures.GetValue(rnd.Next(possibleCreatures.Length));

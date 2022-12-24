@@ -65,6 +65,8 @@ namespace RainWorldCE.Config
             { description = "Show active events in the bottom left?" });
             Tabs[0].AddItems(new OpLabel(45f, 390f, "Show active events")
             { description = "Show active events in the bottom left?" });
+            Tabs[0].AddItems(new OpLabel(250f, 5f, $"RainWorldCE Version {RainWorldCE.modVersion}")
+            { description = "Made by Gamer025" });
 
 
             //Generate checkboxes for disabling/enabling events + custom event config

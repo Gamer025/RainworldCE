@@ -9,31 +9,52 @@ using UnityEngine;
 namespace RainWorldCE.Events
 {
     /// <summary>
-    /// Randomizes the primary color palette
+    /// Makes the current color palette darker
     /// </summary>
-    internal class PaletteRandomizer : CEEvent
+    internal class Darkness : CEEvent
     {
-        public PaletteRandomizer()
+        public Darkness()
         {
-            _name = "Too many mushrooms";
-            _description = "Apparently taking too many of these can have side effects after all";
+            _name = "Darkness / Shaded Region";
+            if (EventHelpers.StoryModeActive && game.world.region is not null)
+            {
+                string regionName = game.world.region.name switch
+                {
+                    "CC" => "Chimney Canopy",
+                    "DS" => "Drainage System",
+                    "HI" => "Industrial Complex",
+                    "GW" => "Garbage Wastes",
+                    "SI" => "Sky Islands",
+                    "SU" => "Outskirts",
+                    "SH" => "Citadel",
+                    "SL" => "Shoreline",
+                    "LF" => "Farm Arrays",
+                    "UW" => "The Exterior",
+                    "SB" => "Subterranean",
+                    "SS" => "Five Pebbles",
+                    _ => "Region"
+                };
+
+                _name = $"Shaded {regionName}";
+            }
+            _description = "Darkness has fallen";
             _activeTime = (int)(60 * RainWorldCE.eventDurationMult);
         }
 
         Texture2D backupPalette;
+        float amount = 0.8f;
 
         public override void StartupTrigger()
         {
+            amount = (float)TryGetConfigAsInt("amount") / 100f;
             Room room = game.cameras[0].room;
             PlayerChangedRoomTrigger(ref game.cameras[0], ref room, ref game.cameras[0].currentCameraPosition);
-            //Just in case the method touched the room ref
+            //Just in the method touched the room ref
             game.cameras[0].room = room;
         }
 
         public override void PlayerChangedRoomTrigger(ref RoomCamera self, ref Room room, ref int camPos)
         {
-            int chance = TryGetConfigAsInt("chance");
-            WriteLog(LogLevel.Debug, $"Chance {chance}");
             backupPalette = new Texture2D(self.fadeTexA.width, self.fadeTexA.height)
             {
                 anisoLevel = 0,
@@ -45,18 +66,26 @@ namespace RainWorldCE.Events
                 anisoLevel = 0,
                 filterMode = FilterMode.Point
             };
+            Texture2D darkPal = new Texture2D(32, 16, TextureFormat.ARGB32, false);
+            self.LoadPalette(10, ref darkPal);
+
             texture.SetPixels(self.fadeTexA.GetPixels());
-            for (int i = 0; i < texture.height; i++)
+            Color[] normalColors = texture.GetPixels();
+            Color[] darkColors = darkPal.GetPixels();
+            Color[] mixed = new Color[normalColors.Length];
+
+            for (int i = 0; i < normalColors.Length; i++)
             {
-                for (int j = 0; j < texture.width; j++)
-                {
-                    if (rnd.Next(100) < chance)
-                    {
-                        texture.SetPixel(j, i, new Color(UnityEngine.Random.Range(0f, 0.75f), UnityEngine.Random.Range(0f, 0.75f), UnityEngine.Random.Range(0f, 0.75f)));
-                    }
-                }
+                Color normalColor = normalColors[i];
+                Color darkColor = darkColors[i];
+                mixed[i] = Color.Lerp(normalColor, darkColor, amount);
             }
-            WriteLog(LogLevel.Debug, $"Applying random color palette");
+
+            texture.SetPixels(mixed);
+            //Darkness pixels
+            texture.SetPixel(30, 7, new Color(0, 0, 0));
+            texture.SetPixel(31, 7, new Color(255, 255, 255));
+
             self.ApplyEffectColorsToPaletteTexture(ref texture, room.roomSettings.EffectColorA, room.roomSettings.EffectColorB);
             self.fadeTexA = texture;
             texture.Apply(false);
@@ -79,7 +108,7 @@ namespace RainWorldCE.Events
             {
                 List<EventConfigEntry> options = new List<EventConfigEntry>
                 {
-                    new IntegerConfigEntry("Intensity", "How badly the palette will be randomized", "chance", new RWCustom.IntVector2(10, 100), 25, this)
+                    new IntegerConfigEntry("Darkness", "How much more darker the rooms are made", "amount", new RWCustom.IntVector2(10, 100), 80, this)
                 };
                 return options;
             }

@@ -28,12 +28,12 @@ namespace RainWorldCE.Events
                 AbstractCreature creature = new AbstractCreature(game.world, StaticWorld.GetCreatureTemplate(CreatureTemplate.Type.Scavenger), null, new WorldCoordinate(game.world.offScreenDen.index, -1, -1, 0), game.GetNewID());
                 sqaud.AddMember(creature);
                 sqaud.missionType = ScavengerAbstractAI.ScavengerSquad.MissionID.HuntCreature;
-                sqaud.targetCreature = helper.MainPlayer;
-                creature.ChangeRooms(helper.MainPlayer.pos);
-                helper.MakeCreatureAttackCreature(creature, helper.MainPlayer);
+                sqaud.targetCreature = EventHelpers.MainPlayer;
+                creature.ChangeRooms(EventHelpers.MainPlayer.pos);
+                EventHelpers.MakeCreatureAttackCreature(creature, EventHelpers.MainPlayer);
             }
-            creatureLeader.ChangeRooms(helper.MainPlayer.pos);
-            helper.MakeCreatureAttackCreature(creatureLeader, helper.MainPlayer);
+            creatureLeader.ChangeRooms(EventHelpers.MainPlayer.pos);
+            EventHelpers.MakeCreatureAttackCreature(creatureLeader, EventHelpers.MainPlayer);
         }
     }
 }

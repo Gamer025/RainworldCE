@@ -22,9 +22,9 @@ namespace RainWorldCE.Events
 
         public override void RecurringTrigger()
         {
-            AbstractPhysicalObject reward = new AbstractSpear(game.world, null, helper.MainPlayer.pos, game.GetNewID(), false);
+            AbstractPhysicalObject reward = new AbstractSpear(game.world, null, EventHelpers.MainPlayer.pos, game.GetNewID(), false);
             reward.Realize();
-            reward.realizedObject.PlaceInRoom(helper.CurrentRoom.realizedRoom);
+            reward.realizedObject.PlaceInRoom(EventHelpers.CurrentRoom.realizedRoom);
         }
     }
 }

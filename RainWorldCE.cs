@@ -13,13 +13,13 @@ using RainWorldCE.Attributes;
 
 namespace RainWorldCE;
 
-[BepInPlugin("Gamer025.RainworldCE", "Rain World Chaos Edition", "1.0.4")]
+[BepInPlugin("Gamer025.RainworldCE", "Rain World Chaos Edition", "1.1.0")]
 public class RainWorldCE : BaseUnityPlugin
 {
     /// <summary>
     /// Time in seconds since game start
     /// </summary>
-    static int gameTimer = 0;
+    static public int gameTimer = 0;
     /// <summary>
     /// gameTimer value at which last chaos event was triggered
     /// </summary>
@@ -39,7 +39,7 @@ public class RainWorldCE : BaseUnityPlugin
     /// <summary>
     /// Currently active chaos events
     /// </summary>
-    static List<CEEvent> activeEvents = new List<CEEvent>();
+    static public List<CEEvent> activeEvents = new List<CEEvent>();
     /// <summary>
     /// All CEEVent classes, will be set to all enabled events by CM otherwise all events (CM)
     /// </summary>
@@ -70,6 +70,10 @@ public class RainWorldCE : BaseUnityPlugin
     /// This is us
     /// </summary>
     public static RainWorldCE instance;
+    /// <summary>
+    /// BepInEx Plugin Version
+    /// </summary>
+    public static Version modVersion;
     static readonly Random rnd = new Random();
 
     //Mod options menu
@@ -82,6 +86,9 @@ public class RainWorldCE : BaseUnityPlugin
     {
         __me = new(this);
         instance = this;
+        BepInPlugin attribute =
+            (BepInPlugin)Attribute.GetCustomAttribute(typeof(RainWorldCE), typeof(BepInPlugin));
+        modVersion = attribute.Version;
     }
     //Logging
     private static WeakReference __me;
@@ -166,11 +173,9 @@ public class RainWorldCE : BaseUnityPlugin
                 selectedEvent.RecurringEventTime = gameTimer;
             }
         }
-
-
     }
 
-    private Type PickEvent()
+    public Type PickEvent()
     {
         Type eventClass;
         if (eventTypes.Count == 0)
@@ -315,8 +320,6 @@ public class RainWorldCE : BaseUnityPlugin
         }
         activeEvents.Clear();
         CEEvent.game = null;
-        CEEvent.helper = null;
-        Array.Clear(blockedEvents, 0, blockedEvents.Length);
     }
 
     /// <summary>
@@ -354,7 +357,6 @@ public class RainWorldCE : BaseUnityPlugin
         ResetState();
         CEEvent.game = self;
         game = self;
-        CEEvent.helper = new EventHelpers(self);
         gameRunning = true;
         //At this point CM should have defenitly loaded its config if it exists, so its safe to add defaults now
         GenerateDefaultConfigs();

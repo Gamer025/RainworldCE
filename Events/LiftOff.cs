@@ -23,7 +23,7 @@ namespace RainWorldCE.Events
 
         public override void RecurringTrigger()
         {
-            foreach (AbstractCreature player in helper.AllPlayers)
+            foreach (AbstractCreature player in EventHelpers.AllPlayers)
             {
                 player.realizedCreature.mainBodyChunk.vel.y += 100f;
             }
