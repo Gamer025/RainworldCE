@@ -104,6 +104,8 @@ public class RainWorldCE : BaseUnityPlugin
         On.RainWorldGame.Win += RainWorldGameWinHook;
         //Add own HUD to the game
         On.HUD.HUD.InitSinglePlayerHud += HUDInitSinglePlayerHudHook;
+        //Needed for fixing teleports
+        On.ShortcutHandler.TeleportingCreatureArrivedInRealizedRoom += ShortcutHandler_TeleportingCreatureArrivedInRealizedRoom;
 
         //Used as trigger for PlayerChangingRoomTrigger
         On.ShortcutHandler.SuckInCreature += ShortcutHandlerSuckInCreatureHook;
@@ -421,6 +423,31 @@ public class RainWorldCE : BaseUnityPlugin
     {
         self.AddPart(new CEHUD(self, activeEvents));
         orig(self, cam);
+    }
+
+    //Thanks to Henpemaz for providing this code and explaining the issue to me
+    //https://github.com/henpemaz/PartModPartMeme/blob/master/MapWarp/MapWarp.cs#L282
+    private void ShortcutHandler_TeleportingCreatureArrivedInRealizedRoom(On.ShortcutHandler.orig_TeleportingCreatureArrivedInRealizedRoom orig, ShortcutHandler self, ShortcutHandler.TeleportationVessel tVessel)
+    {
+        try
+        {
+            orig(self, tVessel);
+        }
+        catch (System.NullReferenceException)
+        {
+            if (!(tVessel.creature is ITeleportingCreature))
+            {
+                WorldCoordinate arrival = tVessel.destination;
+                if (!arrival.TileDefined)
+                {
+                    arrival = tVessel.room.realizedRoom.LocalCoordinateOfNode(tVessel.entranceNode);
+                    arrival.abstractNode = tVessel.entranceNode;
+                }
+
+                tVessel.creature.abstractCreature.pos = arrival;
+                tVessel.creature.SpitOutOfShortCut(arrival.Tile, tVessel.room.realizedRoom, true);
+            }
+        }
     }
 
     #endregion
