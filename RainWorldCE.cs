@@ -139,7 +139,6 @@ public class RainWorldCE : BaseUnityPlugin
                 timepool = 0;
             }
         }
-
     }
 
     /// <summary>
