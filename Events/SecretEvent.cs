@@ -20,7 +20,7 @@ namespace RainWorldCE.Events
 
         public override void StartupTrigger()
         {
-            Type secretEventType = RainWorldCE.instance.PickEvent();
+            Type secretEventType = RainWorldCE.PickEvent();
             // If we are the only enabled event this would cause a loop otherwise
             if (secretEventType == typeof(SecretEvent)) return;
             CEEvent selectedEvent = (CEEvent)Activator.CreateInstance(secretEventType);

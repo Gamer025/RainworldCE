@@ -1,4 +1,4 @@
-﻿using OptionalUI;
+﻿using Menu.Remix.MixedUI;
 using RainWorldCE.Events;
 using System;
 using System.Collections.Generic;
@@ -23,9 +23,19 @@ namespace RainWorldCE.Config
         public override Collection<UIelement> CMelement(Vector2 pos)
         {
             Collection<UIelement> elements = new Collection<UIelement>();
-            elements.Add(new OpCheckBox(pos, Key, defaultBool: defaultBool) { description = Description });
+            elements.Add(new OpCheckBox(CEEvent.configBool[Key], pos) { description = Description });
             elements.Add(new OpLabel(pos.x + 35f, pos.y, Name) { description = Description });
             return elements;
+        }
+
+        public override void BindConfigs(OptionInterface oi)
+        {
+            if (!CEEvent.configBool.ContainsKey(Key))
+            {
+                Configurable<bool> checkboxConfig;
+                checkboxConfig = oi.config.Bind(Key, defaultBool, new ConfigurableInfo(Description));
+                CEEvent.configBool.Add(Key, checkboxConfig);
+            }
         }
     }
 }

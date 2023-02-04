@@ -25,7 +25,7 @@ namespace RainWorldCE.Events
             for (int i = EventHelpers.CurrentRoom.creatures.Count - 1; i >= 0; i--)
             {
                 AbstractCreature oldCreature = EventHelpers.CurrentRoom.creatures[i];
-                if (oldCreature.creatureTemplate.type is CreatureTemplate.Type.Slugcat or CreatureTemplate.Type.Overseer or CreatureTemplate.Type.Fly) continue;
+                if (oldCreature.creatureTemplate.type == CreatureTemplate.Type.Slugcat || oldCreature.creatureTemplate.type == CreatureTemplate.Type.Overseer || oldCreature.creatureTemplate.type == CreatureTemplate.Type.Fly) continue;
 
                 WriteLog(LogLevel.Debug, $"Found {oldCreature} , pos: {oldCreature.pos}");
                 CreatureTemplate.Type type = CreatureTemplate.Type.DaddyLongLegs;

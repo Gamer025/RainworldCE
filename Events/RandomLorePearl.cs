@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using RainWorldCE;
 
 namespace RainWorldCE.Events
 {
@@ -23,7 +24,7 @@ namespace RainWorldCE.Events
             foreach (AbstractCreature player in EventHelpers.AllPlayers)
             {
                 AbstractPhysicalObject reward;
-                DataPearl.AbstractDataPearl.DataPearlType[] pearls = (DataPearl.AbstractDataPearl.DataPearlType[])Enum.GetValues(typeof(DataPearl.AbstractDataPearl.DataPearlType));
+                DataPearl.AbstractDataPearl.DataPearlType[] pearls = Helpers.GetAllValues<DataPearl.AbstractDataPearl.DataPearlType>();
                 DataPearl.AbstractDataPearl.DataPearlType[] badPearls = new DataPearl.AbstractDataPearl.DataPearlType[3]
                 {
                     DataPearl.AbstractDataPearl.DataPearlType.PebblesPearl,

@@ -23,34 +23,70 @@ namespace RainWorldCE.Events
             EventHelpers.MakeCreatureLikeAndFollowCreature(creature, EventHelpers.MainPlayer);
             creature.Realize();
             creature.realizedCreature.PlaceInRoom(EventHelpers.CurrentRoom.realizedRoom);
+            WriteLog(LogLevel.Debug, $"Spawned friendly lizard: {creature}");
         }
 
-        CreatureTemplate.Type PickLizardType
+        static CreatureTemplate.Type PickLizardType
         {
             get
             {
-                int ran = rnd.Next(100);
-                switch (ran)
+                int ran = rnd.Next(111);
+                if (ModManager.MSC)
                 {
-                    case < 20:
-                        return CreatureTemplate.Type.GreenLizard;
-                    case < 40:
-                        return CreatureTemplate.Type.PinkLizard;
-                    case < 60:
-                        return CreatureTemplate.Type.BlueLizard;
-                    case < 70:
-                        return CreatureTemplate.Type.WhiteLizard;
-                    case < 80:
-                        return CreatureTemplate.Type.YellowLizard;
-                    case < 90:
-                        return CreatureTemplate.Type.Salamander;
-                    case < 96:
-                        return CreatureTemplate.Type.BlackLizard;
-                    case <= 98:
-                        return CreatureTemplate.Type.CyanLizard;
-                    case > 98:
-                        return CreatureTemplate.Type.RedLizard;
+                    switch (ran)
+                    {
+                        case < 10:
+                            return CreatureTemplate.Type.GreenLizard;
+                        case < 20:
+                            return MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.SpitLizard;
+                        case < 30:
+                            return CreatureTemplate.Type.PinkLizard;
+                        case < 40:
+                            return MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.SpitLizard;
+                        case < 50:
+                            return MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.ZoopLizard;
+                        case < 60:
+                            return CreatureTemplate.Type.BlueLizard;
+                        case < 70:
+                            return CreatureTemplate.Type.WhiteLizard;
+                        case < 80:
+                            return CreatureTemplate.Type.YellowLizard;
+                        case < 90:
+                            return CreatureTemplate.Type.Salamander;
+                        case < 99:
+                            return CreatureTemplate.Type.BlackLizard;
+                        case < 105:
+                            return CreatureTemplate.Type.CyanLizard;
+                        case <= 108:
+                            return CreatureTemplate.Type.RedLizard;
+                        case > 108:
+                            return MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.TrainLizard;
 
+                    }
+                }
+                else
+                {
+                    switch (ran)
+                    {
+                        case < 20:
+                            return CreatureTemplate.Type.GreenLizard;
+                        case < 40:
+                            return CreatureTemplate.Type.PinkLizard;
+                        case < 60:
+                            return CreatureTemplate.Type.BlueLizard;
+                        case < 70:
+                            return CreatureTemplate.Type.WhiteLizard;
+                        case < 80:
+                            return CreatureTemplate.Type.YellowLizard;
+                        case < 90:
+                            return CreatureTemplate.Type.Salamander;
+                        case < 99:
+                            return CreatureTemplate.Type.BlackLizard;
+                        case <= 106:
+                            return CreatureTemplate.Type.CyanLizard;
+                        case > 106:
+                            return CreatureTemplate.Type.RedLizard;
+                    }
                 }
             }
         }

@@ -12,7 +12,7 @@ namespace RainWorldCE.Events
     {
         public Speed()
         {
-            _name = "Speeed";
+            _name = "Speeeeed";
             _description = "Gotta go fast";
             _activeTime = (int)(60 * RainWorldCE.eventDurationMult);
         }

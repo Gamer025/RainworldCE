@@ -20,8 +20,6 @@ namespace RainWorldCE.Events
             _activeTime = (int)(60 * RainWorldCE.eventDurationMult);
         }
 
-        Texture2D backupPalette;
-
         public override void StartupTrigger()
         {
             Room room = game.cameras[0].room;
@@ -33,13 +31,6 @@ namespace RainWorldCE.Events
         public override void PlayerChangedRoomTrigger(ref RoomCamera self, ref Room room, ref int camPos)
         {
             int chance = TryGetConfigAsInt("chance");
-            WriteLog(LogLevel.Debug, $"Chance {chance}");
-            backupPalette = new Texture2D(self.fadeTexA.width, self.fadeTexA.height)
-            {
-                anisoLevel = 0,
-                filterMode = FilterMode.Point
-            };
-            backupPalette.SetPixels(self.fadeTexA.GetPixels());
             Texture2D texture = new Texture2D(32, 16, TextureFormat.ARGB32, false)
             {
                 anisoLevel = 0,
@@ -67,8 +58,15 @@ namespace RainWorldCE.Events
         {
             foreach (RoomCamera cam in game.cameras)
             {
-                cam.fadeTexA = backupPalette;
-                backupPalette.Apply(false);
+                Texture2D restore = new Texture2D(cam.fadeTexA.width, cam.fadeTexA.height)
+                {
+                    anisoLevel = 0,
+                    filterMode = FilterMode.Point
+                };
+                cam.LoadPalette(cam.room.roomSettings.Palette, ref restore);
+                cam.ApplyEffectColorsToPaletteTexture(ref restore, cam.room.roomSettings.EffectColorA, cam.room.roomSettings.EffectColorB);
+                cam.fadeTexA = restore;
+                restore.Apply(false);
                 cam.ApplyFade();
             }
         }

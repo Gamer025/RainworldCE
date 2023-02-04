@@ -18,22 +18,7 @@ namespace RainWorldCE.Events
             _name = "Darkness / Shaded Region";
             if (EventHelpers.StoryModeActive && game.world.region is not null)
             {
-                string regionName = game.world.region.name switch
-                {
-                    "CC" => "Chimney Canopy",
-                    "DS" => "Drainage System",
-                    "HI" => "Industrial Complex",
-                    "GW" => "Garbage Wastes",
-                    "SI" => "Sky Islands",
-                    "SU" => "Outskirts",
-                    "SH" => "Citadel",
-                    "SL" => "Shoreline",
-                    "LF" => "Farm Arrays",
-                    "UW" => "The Exterior",
-                    "SB" => "Subterranean",
-                    "SS" => "Five Pebbles",
-                    _ => "Region"
-                };
+                string regionName = Region.GetRegionFullName(game.world.region.name, (EventHelpers.MainPlayer.realizedCreature as Player).SlugCatClass);
 
                 _name = $"Shaded {regionName}";
             }
@@ -41,12 +26,11 @@ namespace RainWorldCE.Events
             _activeTime = (int)(60 * RainWorldCE.eventDurationMult);
         }
 
-        Texture2D backupPalette;
         float amount = 0.8f;
 
         public override void StartupTrigger()
         {
-            amount = (float)TryGetConfigAsInt("amount") / 100f;
+            amount = TryGetConfigAsInt("amount") / 100f;
             Room room = game.cameras[0].room;
             PlayerChangedRoomTrigger(ref game.cameras[0], ref room, ref game.cameras[0].currentCameraPosition);
             //Just in the method touched the room ref
@@ -55,12 +39,6 @@ namespace RainWorldCE.Events
 
         public override void PlayerChangedRoomTrigger(ref RoomCamera self, ref Room room, ref int camPos)
         {
-            backupPalette = new Texture2D(self.fadeTexA.width, self.fadeTexA.height)
-            {
-                anisoLevel = 0,
-                filterMode = FilterMode.Point
-            };
-            backupPalette.SetPixels(self.fadeTexA.GetPixels());
             Texture2D texture = new Texture2D(32, 16, TextureFormat.ARGB32, false)
             {
                 anisoLevel = 0,
@@ -96,8 +74,15 @@ namespace RainWorldCE.Events
         {
             foreach (RoomCamera cam in game.cameras)
             {
-                cam.fadeTexA = backupPalette;
-                backupPalette.Apply(false);
+                Texture2D restore = new Texture2D(cam.fadeTexA.width, cam.fadeTexA.height)
+                {
+                    anisoLevel = 0,
+                    filterMode = FilterMode.Point
+                };
+                cam.LoadPalette(cam.room.roomSettings.Palette, ref restore);
+                cam.ApplyEffectColorsToPaletteTexture(ref restore, cam.room.roomSettings.EffectColorA, cam.room.roomSettings.EffectColorB);
+                cam.fadeTexA = restore;
+                restore.Apply(false);
                 cam.ApplyFade();
             }
         }

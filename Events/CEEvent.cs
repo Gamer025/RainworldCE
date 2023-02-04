@@ -68,7 +68,8 @@ namespace RainWorldCE.Events
         #endregion
 
         #region internalFields
-        public static Dictionary<string, string> config = new Dictionary<string, string>();
+        public static Dictionary<string, Configurable<int>> configInt = new Dictionary<string, Configurable<int>>();
+        public static Dictionary<string, Configurable<bool>> configBool = new Dictionary<string, Configurable<bool>>();
         public bool expired = false;
         protected float _recurringEventTime = 0;
         /// <summary>
@@ -132,25 +133,14 @@ namespace RainWorldCE.Events
         }
 
         /// <summary>
-        /// Get config value for specified key
-        /// </summary>
-        /// <param name="key">Config identifier</param>
-        /// <returns>Value as string if found otherwise null</returns>
-        protected string GetConfig(string key)
-        {
-            return config.ContainsKey($"EC_{GetType().Name}_{key}") ? config[$"EC_{GetType().Name}_{key}"] : null;
-        }
-
-        /// <summary>
         /// Tries to get the specified config as bool, returns if config does not exist
         /// </summary>
         /// <param name="key"></param>
         /// <returns>Config as bool, false on error/null</returns>
         protected bool TryGetConfigAsBool(string key)
         {
-            config.TryGetValue($"EC_{GetType().Name}_{key}", out string configResult);
-            bool.TryParse(configResult, out bool result);
-            return result;
+            configBool.TryGetValue($"EC_{GetType().Name}_{key}", out Configurable<bool> configResult);
+            return configResult.Value;
         }
 
         /// <summary>
@@ -160,9 +150,8 @@ namespace RainWorldCE.Events
         /// <returns>Config as int, 0 on error/null</returns>
         protected int TryGetConfigAsInt(string key)
         {
-            config.TryGetValue($"EC_{GetType().Name}_{key}", out string configResult);
-            int.TryParse(configResult, out int result);
-            return result;
+            configInt.TryGetValue($"EC_{GetType().Name}_{key}", out Configurable<int> configResult);
+            return configResult.Value;
         }
 
     }

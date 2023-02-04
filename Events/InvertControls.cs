@@ -29,9 +29,9 @@ namespace RainWorldCE.Events
             On.RWInput.PlayerInput -= RWInputPlayerInputHook;
         }
 
-        public Player.InputPackage RWInputPlayerInputHook(On.RWInput.orig_PlayerInput orig, int playerNumber, Options options, RainWorldGame.SetupValues setup)
+        public Player.InputPackage RWInputPlayerInputHook(On.RWInput.orig_PlayerInput orig, int playerNumber, RainWorld rainWorld)
         {
-            Player.InputPackage result = orig(playerNumber, options, setup);
+            Player.InputPackage result = orig(playerNumber, rainWorld);
             result.x *= -1;
             result.y *= -1;
             return result;

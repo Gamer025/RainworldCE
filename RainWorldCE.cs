@@ -1,21 +1,26 @@
 ﻿using BepInEx;
 using BepInEx.Logging;
-using OptionalUI;
-using System;
+using IL.Menu.Remix.MixedUI;
+using RainWorldCE.Attributes;
+using RainWorldCE.Config;
+using RainWorldCE.Config.CustomChaos;
 using RainWorldCE.Events;
+using RainWorldCE.RWHUD;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
+using System.IO;
 using System.Linq;
 using System.Reflection;
-using RainWorldCE.RWHUD;
-using RainWorldCE.Config;
-using System.ComponentModel.Design;
-using RainWorldCE.Attributes;
+using System.Security.Permissions;
+[assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
 
 namespace RainWorldCE;
 
-[BepInPlugin("Gamer025.RainworldCE", "Rain World Chaos Edition", "1.1.1")]
+[BepInPlugin(MOD_ID, "Rain World Chaos Edition", "2.0.0")]
 public class RainWorldCE : BaseUnityPlugin
 {
+    public const string MOD_ID = "Gamer025.RainworldCE";
     /// <summary>
     /// Time in seconds since game start
     /// </summary>
@@ -27,7 +32,12 @@ public class RainWorldCE : BaseUnityPlugin
     /// <summary>
     /// Time between chaos events (CM)
     /// </summary>
-    public static int eventTimeout = 60;
+    public static Configurable<int> _eventTimeout;
+    public static int eventTimeout => _eventTimeout.Value;
+    /// <summary>
+    /// Percentage of events to not repeat
+    /// </summary>
+    public static Configurable<int> blockedEventPercent;
     /// <summary>
     /// CEHUD which contains the labels for new events happening and active events
     /// </summary>
@@ -35,7 +45,8 @@ public class RainWorldCE : BaseUnityPlugin
     /// <summary>
     /// Are we displaying active events as text to the player? (CM)
     /// </summary>
-    public static bool showActiveEvents = true;
+    public static Configurable<bool> _showActiveEvents;
+    public static bool showActiveEvents => _showActiveEvents.Value;
     /// <summary>
     /// Currently active chaos events
     /// </summary>
@@ -43,7 +54,7 @@ public class RainWorldCE : BaseUnityPlugin
     /// <summary>
     /// All CEEVent classes, will be set to all enabled events by CM otherwise all events (CM)
     /// </summary>
-    public static List<Type> eventTypes;
+    public static List<Type> eventTypes = new List<Type>();
     /// <summary>
     /// Events that can't be triggered because they happened too recently
     /// </summary>
@@ -55,11 +66,13 @@ public class RainWorldCE : BaseUnityPlugin
     /// <summary>
     /// Maximum amount of events to execute per cycle (CM)
     /// </summary>
-    static public int maxEventCount = 1000;
+    static public Configurable<int> _maxEventCount;
+    static public int maxEventCount => _maxEventCount.Value;
+    static public Configurable<int> _eventDurationMult;
     /// <summary>
     /// Multiplier for event length
     /// </summary>
-    static public float eventDurationMult = 1;
+    static public float eventDurationMult => (float)(_eventDurationMult.Value) / 10;
     /// <summary>
     /// CE will only Update() (create events/call event triggers etc.) if game is active
     /// </summary>
@@ -74,13 +87,11 @@ public class RainWorldCE : BaseUnityPlugin
     /// BepInEx Plugin Version
     /// </summary>
     public static Version modVersion;
+    /// <summary>
+    /// Mod is running in CustomChaos mods and events are file driven
+    /// </summary>
+    public static bool CCMode = false;
     static readonly Random rnd = new Random();
-
-    //Mod options menu
-    public static OptionInterface LoadOI()
-    {
-        return new RainWorldCEOI();
-    }
 
     public RainWorldCE()
     {
@@ -97,6 +108,8 @@ public class RainWorldCE : BaseUnityPlugin
 
     public void OnEnable()
     {
+        ME.Logger_p.Log(LogLevel.Info, "RainWorldCE enabled");
+
         //Used for starting up everything
         On.RainWorldGame.ctor += RainWorldGameCtorHook;
         //Triggers for resetting CEs state
@@ -112,13 +125,11 @@ public class RainWorldCE : BaseUnityPlugin
         //Used as trigger for PlayerChangedRoomTrigger
         On.RoomCamera.ChangeRoom += RoomCameraChangeRoomHook;
 
-        //Load all events in case CM hasn't already populated the list
-        eventTypes ??= RainWorldCE.GetAllCEEventTypes().OrderBy(x => x.Name).ToList();
-        //Set event repetition blocker to 25% as default in case CM doesn't override it
-        blockedEvents = new Type[Convert.ToInt32(Math.Min((double)RainWorldCE.eventTypes.Count * 25 / 100, (double)RainWorldCE.eventTypes.Count - 1))];
+        On.RainWorld.OnModsInit += OnModsInitHook;
     }
 
-    static float timepool = 0;
+    //Start at -1 to give the game some time to start up fully
+    static float timepool = -1;
     void Update()
     {
         //Only tick if the game seems to be running and is in story mode
@@ -150,33 +161,38 @@ public class RainWorldCE : BaseUnityPlugin
         eventCounter++;
         CEEvent selectedEvent = (CEEvent)Activator.CreateInstance(eventClass);
         RainWorldCE.ME.Logger_p.Log(LogLevel.Info, $"Triggering '{selectedEvent.Name}' event");
-        CEHUD.StopEventSelection(selectedEvent);
-        if (selectedEvent.ImplementsMethod("StartupTrigger"))
+        activateEvent(selectedEvent);
+    }
+
+    public static void activateEvent(CEEvent ceevent)
+    {
+        CEHUD.StopEventSelection(ceevent);
+        if (ceevent.ImplementsMethod("StartupTrigger"))
         {
-            RainWorldCE.ME.Logger_p.Log(LogLevel.Debug, $"Calline StartupTrigger of '{selectedEvent.Name}' event");
+            RainWorldCE.ME.Logger_p.Log(LogLevel.Debug, $"Calline StartupTrigger of '{ceevent.Name}' event");
             try
             {
-                selectedEvent.StartupTrigger();
+                ceevent.StartupTrigger();
             }
             catch (Exception e)
             {
-                RainWorldCE.ME.Logger_p.Log(LogLevel.Error, $"'{selectedEvent.Name}' errored on startup, cancel event");
+                RainWorldCE.ME.Logger_p.Log(LogLevel.Error, $"'{ceevent.Name}' errored on startup, cancel event");
                 RainWorldCE.ME.Logger_p.Log(LogLevel.Error, e.ToString());
                 return;
             }
         }
-        if (selectedEvent.ActiveTime > 0)
+        if (ceevent.ActiveTime > 0)
         {
-            activeEvents.Add(selectedEvent);
-            if (showActiveEvents) CEHUD.AddActiveEvent(selectedEvent.Name);
-            if (selectedEvent.RepeatEverySec > 0)
+            activeEvents.Add(ceevent);
+            if (showActiveEvents) CEHUD.AddActiveEvent(ceevent.Name);
+            if (ceevent.RepeatEverySec > 0)
             {
-                selectedEvent.RecurringEventTime = gameTimer;
+                ceevent.RecurringEventTime = gameTimer;
             }
         }
     }
 
-    public Type PickEvent()
+    public static Type PickEvent()
     {
         Type eventClass;
         if (eventTypes.Count == 0)
@@ -219,7 +235,7 @@ public class RainWorldCE : BaseUnityPlugin
         return eventClass;
     }
 
-    private void RemoveAlreadyActiveEvents(ref List<Type> allowedEvents)
+    private static void RemoveAlreadyActiveEvents(ref List<Type> allowedEvents)
     {
         for (int i = allowedEvents.Count - 1; i >= 0; i--)
         {
@@ -233,20 +249,6 @@ public class RainWorldCE : BaseUnityPlugin
             }
         }
     }
-
-    /// <summary>
-    /// Add default values to CEEvents config if no value provided by CM
-    /// </summary>
-    private void GenerateDefaultConfigs()
-    {
-        List<CEEvent> events = GetAllCEEventTypes().Select(x => (CEEvent)Activator.CreateInstance(x)).OrderBy(e => e.Name).ToList();
-        //Add to config if key not already exist
-        foreach (var entry in events.SelectMany(ceevent => ceevent.ConfigEntries.Where(entry => !CEEvent.config.ContainsKey(entry.Key))))
-        {
-            CEEvent.config.Add(entry.Key, entry.DefaultValue);
-        }
-    }
-
 
     /// <summary>
     /// Runs every second and triggers new chaos events / RecurringTrigger methods and expiring events 
@@ -276,19 +278,27 @@ public class RainWorldCE : BaseUnityPlugin
             activeEvent.ActiveTime--;
         }
 
-        //Only create new event if we didn't yet reach the limit for the cycle
-        if (eventCounter < maxEventCount)
+        //Either trigger events as defined in file or randomly picked
+        if (CCMode)
         {
-            //Start the event selection HUD magic 3 seconds before the actual event
-            if (gameTimer - (CETriggerTime - 3) >= eventTimeout)
+            CustomChaos.CustomChaosUpdate();
+        }
+        else
+        {
+            //Only create new event if we didn't yet reach the limit for the cycle
+            if (eventCounter < maxEventCount)
             {
-                CEHUD.StartEventSelection();
-            }
-            //Enough time has passed till last chaos event
-            if (gameTimer - CETriggerTime >= eventTimeout)
-            {
-                CreateNewEvent();
-                CETriggerTime = gameTimer;
+                //Start the event selection HUD magic 3 seconds before the actual event
+                if (gameTimer - (CETriggerTime - 3) >= eventTimeout)
+                {
+                    CEHUD.StartEventSelection();
+                }
+                //Enough time has passed till last chaos event
+                if (gameTimer - CETriggerTime >= eventTimeout)
+                {
+                    CreateNewEvent();
+                    CETriggerTime = gameTimer;
+                }
             }
         }
 
@@ -313,6 +323,8 @@ public class RainWorldCE : BaseUnityPlugin
         gameTimer = 0;
         CETriggerTime = 0;
         eventCounter = 0;
+        CustomChaos.step = 0;
+        CustomChaos.nextTrigger = 0;
         //Call the shutdown event of active events before we remove the reference to the game
         //In theory most events shouldn't need to cleanup since world is getting rebuild but some might have hooked stuff and need to undo these hooks
         foreach (var ceevent in activeEvents.Where(ceevent => ceevent.ImplementsMethod("ShutdownTrigger")))
@@ -333,14 +345,14 @@ public class RainWorldCE : BaseUnityPlugin
         {
             if (ceevent.ImplementsMethod("ShutdownTrigger"))
             {
-                RainWorldCE.ME.Logger_p.Log(LogLevel.Debug, $"Calline ShutdownTrigger of '{ceevent.Name}' event");
+                ME.Logger_p.Log(LogLevel.Debug, $"Calline ShutdownTrigger of '{ceevent.Name}' event");
                 ceevent.ShutdownTrigger();
             }
         }
         catch (Exception e)
         {
-            RainWorldCE.ME.Logger_p.Log(LogLevel.Error, $"Error during '{ceevent.Name}' shutdown");
-            RainWorldCE.ME.Logger_p.Log(LogLevel.Error, e.ToString());
+            ME.Logger_p.Log(LogLevel.Error, $"Error during '{ceevent.Name}' shutdown");
+            ME.Logger_p.Log(LogLevel.Error, e.ToString());
 
         }
         finally
@@ -350,17 +362,60 @@ public class RainWorldCE : BaseUnityPlugin
         }
     }
 
+    public static void TryLoadCC()
+    {
+        string configFile = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "..\\CC.txt");
+        ME.Logger_p.Log(LogLevel.Info, $"Checking for CC.txt at {configFile}");
+        CCMode = File.Exists(configFile);
+        ME.Logger_p.Log(LogLevel.Info, $"CCMode is {CCMode}");
+        if (CCMode)
+        {
+            CustomChaos.parseConfig(File.ReadAllLines(configFile));
+        }
+    }
+
     #region Hooks
     void RainWorldGameCtorHook(On.RainWorldGame.orig_ctor orig, RainWorldGame self, ProcessManager manager)
     {
         orig(self, manager);
-        RainWorldCE.ME.Logger_p.Log(LogLevel.Info, $"Starting event cycle with {eventTimeout} second timer");
+        TryLoadCC();
+        ME.Logger_p.Log(LogLevel.Info, $"Starting event cycle with {eventTimeout} second timer");
         ResetState();
         CEEvent.game = self;
         game = self;
+
+        //Determine enabled events
+        eventTypes.Clear();
+        foreach (KeyValuePair<string, Configurable<bool>> entry in RainWorldCEOI.eventStatus)
+        {
+            bool enabled = entry.Value.Value;
+            ME.Logger_p.Log(LogLevel.Debug, $"Setting {entry.Key} to: {enabled} from Remix");
+            if (enabled)
+            {
+                eventTypes.Add(Type.GetType($"RainWorldCE.Events.{entry.Key.Replace("CEEvent_", "")}"));
+            }
+        }
+
+        //Calculate blocked event count
+        if (eventTypes.Count > 1)
+        {
+            int blockCount =
+                Convert.ToInt32(Math.Min(
+                    (double)eventTypes.Count * blockedEventPercent.Value / 100,
+                    (double)eventTypes.Count - 1));
+            if (blockedEvents is null || blockedEvents.Length != blockCount)
+            {
+                ME.Logger_p.Log(LogLevel.Debug, $"Setting blockedEvents to {blockCount} from Remix");
+                blockedEvents = new Type[blockCount];
+            }
+        }
+        else
+        {
+            ME.Logger_p.Log(LogLevel.Debug, $"Less than two enabled events, setting blockedEvents to 0 from Remix");
+            blockedEvents = Array.Empty<Type>();
+        }
+
         gameRunning = true;
-        //At this point CM should have defenitly loaded its config if it exists, so its safe to add defaults now
-        GenerateDefaultConfigs();
     }
 
     void RainWorldGameExitGameHook(On.RainWorldGame.orig_ExitGame orig, RainWorldGame self, bool asDeath, bool asQuit)
@@ -434,7 +489,7 @@ public class RainWorldCE : BaseUnityPlugin
         }
         catch (System.NullReferenceException)
         {
-            if (!(tVessel.creature is ITeleportingCreature))
+            if (tVessel.creature is not ITeleportingCreature)
             {
                 WorldCoordinate arrival = tVessel.destination;
                 if (!arrival.TileDefined)
@@ -447,6 +502,18 @@ public class RainWorldCE : BaseUnityPlugin
                 tVessel.creature.SpitOutOfShortCut(arrival.Tile, tVessel.room.realizedRoom, true);
             }
         }
+    }
+
+    bool OIRegisted = false;
+    private void OnModsInitHook(On.RainWorld.orig_OnModsInit orig, RainWorld self)
+    {
+        orig(self);
+        if (!OIRegisted)
+        {
+            MachineConnector.SetRegisteredOI(MOD_ID, new RainWorldCEOI());
+            OIRegisted = true;
+        }
+        
     }
 
     #endregion

@@ -1,5 +1,6 @@
-﻿using IL.RWCustom;
-using OptionalUI;
+﻿using BepInEx.Logging;
+using IL.RWCustom;
+using Menu.Remix.MixedUI;
 using RainWorldCE.Events;
 using System;
 using System.Collections.Generic;
@@ -23,13 +24,24 @@ namespace RainWorldCE.Config
         }
 
         public override int size { get { return 30; } }
+
         private int defaultInt;
         public override Collection<UIelement> CMelement(Vector2 pos)
         {
             Collection<UIelement> elements = new Collection<UIelement>();
             elements.Add(new OpLabel(pos.x, pos.y, Name) { description = Description });
-            elements.Add(new OpSlider(new Vector2(pos.x + 7f * Name.Length, pos.y - 5f), Key, range, defaultValue: defaultInt) { description = Description });
+            elements.Add(new OpSlider(CEEvent.configInt[Key], new Vector2(pos.x + 7f * Name.Length, pos.y - 5f), range.y - range.x) { description = Description });
             return elements;
+        }
+
+        public override void BindConfigs(OptionInterface oi)
+        {
+            if (!CEEvent.configInt.ContainsKey(Key))
+            {
+                Configurable<int> sliderConfig;
+                sliderConfig = oi.config.Bind(Key, defaultInt, new ConfigurableInfo(Description));
+                CEEvent.configInt.Add(Key, sliderConfig);
+            }
         }
     }
 }

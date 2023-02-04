@@ -1,11 +1,11 @@
-﻿using OptionalUI;
-using RainWorldCE.Events;
+﻿using RainWorldCE.Events;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using Menu.Remix.MixedUI;
 
 namespace RainWorldCE.Config
 {
@@ -40,6 +40,7 @@ namespace RainWorldCE.Config
         /// </summary>
         public string DefaultValue { get; set; }
 
+        public abstract void BindConfigs(OptionInterface oi);
         public abstract Collection<UIelement> CMelement(Vector2 pos);
     }
 }
