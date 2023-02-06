@@ -34,6 +34,10 @@ namespace RainWorldCE.RWHUD
         /// The currently displayed active events
         /// </summary>
         private readonly List<FLabel> activeEventLabels = new List<FLabel>();
+        /// <summary>
+        /// How long selected events will be displayed for
+        /// </summary>
+        public static Configurable<int> eventDisplayTime;
 
         readonly Random rand = new Random();
 
@@ -81,7 +85,7 @@ namespace RainWorldCE.RWHUD
         {
             timePool += timeStacker;
             //Should run about every 100ms assuming FPS is fine
-            if (timePool > 4f)
+            if (timePool > 3f)
             {
                 //Show random event names if selection in progress
                 if (eventSelection)
@@ -89,11 +93,11 @@ namespace RainWorldCE.RWHUD
                     //RainWorldCE.ME.Logger_p.Log(LogLevel.Debug, $"Count: {eventNames.Count} Events: {String.Join(",", eventNames.ToArray())}");
                     eventNameLabel.text = eventNames[rand.Next(eventNames.Count)];
                 }
-                //Otherwise keep up the current text for around 5 seconds and then remove it
+                //Otherwise keep up the current text for around config seconds and then remove it
                 else if (eventNameLabel.text != String.Empty)
                 {
                     displayCounter++;
-                    if (displayCounter > 50)
+                    if (displayCounter > eventDisplayTime.Value * 10)
                     {
                         eventNameLabel.text = String.Empty;
                         eventDescriptionLabel.text = String.Empty;
@@ -110,6 +114,9 @@ namespace RainWorldCE.RWHUD
 
         internal void StartEventSelection()
         {
+            eventNameLabel.text = String.Empty;
+            eventDescriptionLabel.text = String.Empty;
+            displayCounter = 0;
             eventSelection = true;
         }
 

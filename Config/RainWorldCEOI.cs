@@ -8,6 +8,7 @@ using Menu.Remix.MixedUI;
 using RainWorldCE.Config.CustomChaos;
 using System.IO;
 using System.Reflection;
+using RainWorldCE.RWHUD;
 
 namespace RainWorldCE.Config
 {
@@ -19,7 +20,8 @@ namespace RainWorldCE.Config
             RainWorldCE.blockedEventPercent = config.Bind("blockedEventPercent", 50, new ConfigAcceptableRange<int>(0, 100));
             RainWorldCE._maxEventCount = config.Bind("maxEventCount", 200, new ConfigAcceptableRange<int>(1, 200));
             RainWorldCE._eventDurationMult = config.Bind("eventDurationMult", 10, new ConfigAcceptableRange<int>(1, 50));
-            RainWorldCE._showActiveEvents = config.Bind("showActiveEvents", true, new ConfigurableInfo("Show active events in the bottom left ?", null, "Show active events"));
+            CEHUD.eventDisplayTime = config.Bind("eventDisplayTime", 5, new ConfigAcceptableRange<int>(1, 15));
+            RainWorldCE._showActiveEvents = config.Bind("showActiveEvents", true, new ConfigurableInfo("Show active events in the bottom left?", null, "Show active events"));
 
             // Enable/Disable event checkboxes
             List<Type> allEventTypes = RainWorldCE.GetAllCEEventTypes().OrderBy(x => x.Name).ToList();
@@ -102,9 +104,19 @@ namespace RainWorldCE.Config
             "10 is normal event length, 1 would be 10 times shorter, 50 would be 5 times longer events."
             });
 
+            //Event display time
+            Tabs[0].AddItems(new OpLabel(10f, 380f, "Event name/description display time:")
+            {
+                description = "Determines how long event name and description will be displayed for, when an event gets selected in seconds."
+            });
+            Tabs[0].AddItems(new OpSlider(CEHUD.eventDisplayTime, new Vector2(220f, 375f), 100)
+            {
+                description = "Determines how long event name and description will be displayed for, when an event gets selected in seconds."
+            });
+
             //Show active events checkbox
-            Tabs[0].AddItems(new OpCheckBox(RainWorldCE._showActiveEvents, new Vector2(10f, 390f)));
-            Tabs[0].AddItems(new OpLabel(45f, 390f, "Show active events")
+            Tabs[0].AddItems(new OpCheckBox(RainWorldCE._showActiveEvents, new Vector2(10f, 350f)));
+            Tabs[0].AddItems(new OpLabel(45f, 350f, "Show active events")
             { description = "Show active events in the bottom left?" });
 
             //Open in explorer button

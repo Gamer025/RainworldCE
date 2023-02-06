@@ -1,6 +1,8 @@
 ﻿using BepInEx.Logging;
 using IL;
 using IL.JollyCoop.JollyManual;
+using On;
+using RainWorldCE.Config;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +18,7 @@ namespace RainWorldCE.Events
     {
 
         List<CreatureTemplate.Type> possibleCreatures = new List<CreatureTemplate.Type>();
+        Dictionary<AbstractCreature, AbstractCreature> restore = new Dictionary<AbstractCreature, AbstractCreature>();
         public CreatureRandomizer()
         {
             _name = "DNA Mutations";
@@ -51,7 +54,71 @@ namespace RainWorldCE.Events
                 movingTo.AddEntity(newCreature);
                 newCreature.Realize();
                 newCreature.realizedCreature.PlaceInRoom(room);
-                oldCreature.realizedCreature.Destroy();
+                //If list already contains the creature we are now replacing it means that creature itself is a randomized creature
+                //Get that real original creature and add it with the new creature as key
+                if (TryGetConfigAsBool("restoreCreatures") && restore.ContainsKey(oldCreature))
+                {
+                    restore.Add(newCreature, restore[oldCreature]);
+                    restore.Remove(oldCreature);
+                    oldCreature.realizedCreature.Destroy();
+                }
+                //Otherwise just back it up
+                else if (TryGetConfigAsBool("restoreCreatures"))
+                {
+                    oldCreature.realizedCreature.room = null;
+                    oldCreature.Abstractize(oldCreature.pos);
+                    oldCreature.Room.RemoveEntity(oldCreature.ID);
+                    if (oldCreature is not null && !oldCreature.slatedForDeletion)
+                    {
+                        restore.Add(newCreature, oldCreature);
+                    }
+                }
+                else
+                    oldCreature.realizedCreature.Destroy();
+            }
+        }
+
+        public override void ShutdownTrigger()
+        {
+            if (TryGetConfigAsBool("restoreCreatures"))
+            {
+                WriteLog(LogLevel.Debug, "Restoring creatures...");
+                foreach (KeyValuePair<AbstractCreature, AbstractCreature> kvp in restore)
+                {
+                    WriteLog(LogLevel.Debug, $"Restoring {kvp.Value} with {kvp.Key} as randomized creature");
+                    kvp.Value.pos = kvp.Key.pos;
+                    kvp.Key.Room.AddEntity(kvp.Value);
+                    if (kvp.Key.realizedCreature is not null)
+                    {
+                        if (kvp.Key.realizedCreature.room is not null)
+                        {
+                            kvp.Value.Realize();
+                            kvp.Value.realizedCreature.PlaceInRoom(kvp.Key.realizedCreature.room);
+                        }
+                        else
+                        {
+                            WriteLog(LogLevel.Debug, $"Realized creature room null, try abstract: {kvp.Key.Room.realizedRoom}");
+                            kvp.Value.Realize();
+                            kvp.Value.realizedCreature.PlaceInRoom(kvp.Key.Room.realizedRoom);
+                        }
+                        kvp.Key.realizedCreature.Destroy();
+                    }
+                    else
+                        kvp.Key.Room.RemoveEntity(kvp.Key);
+                        kvp.Key.Destroy();
+                }
+            }
+        }
+
+        public override List<EventConfigEntry> ConfigEntries
+        {
+            get
+            {
+                List<EventConfigEntry> options = new List<EventConfigEntry>
+                {
+                    new BooleanConfigEntry("Restore creatures?", "Restore the original creatures at the end of the event?", "restoreCreatures", false, this)
+                };
+                return options;
             }
         }
     }
