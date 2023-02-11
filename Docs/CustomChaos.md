@@ -34,7 +34,8 @@ NoodleInvasion - Noodle invasion
 PaletteRandomizer - Too many mushrooms  
 RainbowCat - Rainbow Cat  
 RainyDay - Rainy day  
-RandomLorePearl - A piece of history  
+RandomLorePearl - A piece of history
+Rifle - Free gun    
 RoomConnectionShuffle - Geographic issues  
 Rot - The Rot
 ScavConvention - Annual scavenger convention  

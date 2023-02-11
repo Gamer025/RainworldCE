@@ -72,6 +72,10 @@ namespace RainWorldCE.Events
                     {
                         restore.Add(newCreature, oldCreature);
                     }
+                    else
+                    {
+                        restore.Add(newCreature, null);
+                    }
                 }
                 else
                     oldCreature.realizedCreature.Destroy();
@@ -85,6 +89,22 @@ namespace RainWorldCE.Events
                 WriteLog(LogLevel.Debug, "Restoring creatures...");
                 foreach (KeyValuePair<AbstractCreature, AbstractCreature> kvp in restore)
                 {
+                    //If value (orig creature) is null just delete the replacement
+                    if (kvp.Value is null)
+                    {
+                        if (kvp.Key.realizedCreature is not null)
+                        {
+                            kvp.Key.realizedCreature.Destroy();
+                        }
+                        else
+                        {
+                            kvp.Key.Room.RemoveEntity(kvp.Key);
+                            kvp.Key.Destroy();
+                        }
+                        return;
+                    }
+
+                    //Otherwise restoer the orig creature and delete replacemnet
                     WriteLog(LogLevel.Debug, $"Restoring {kvp.Value} with {kvp.Key} as randomized creature");
                     kvp.Value.pos = kvp.Key.pos;
                     kvp.Key.Room.AddEntity(kvp.Value);
@@ -105,7 +125,7 @@ namespace RainWorldCE.Events
                     }
                     else
                         kvp.Key.Room.RemoveEntity(kvp.Key);
-                        kvp.Key.Destroy();
+                    kvp.Key.Destroy();
                 }
             }
         }
