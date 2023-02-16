@@ -21,7 +21,20 @@ namespace RainWorldCE.Events
         {
             foreach (AbstractCreature player in EventHelpers.AllPlayers)
             {
-                (player.realizedCreature as Player).Regurgitate();
+                if ((player.realizedCreature as Player).SlugCatClass == MoreSlugcats.MoreSlugcatsEnums.SlugcatStatsName.Spear)
+                {
+                    AbstractSpear spear = new AbstractSpear(game.world, null, player.pos, game.GetNewID(), explosive: false);
+                    EventHelpers.CurrentRoom.AddEntity(spear);
+                    spear.pos = player.pos;
+                    spear.RealizeInRoom();
+                    (spear.realizedObject as Spear).Spear_makeNeedle(UnityEngine.Random.Range(0, 3), active: true);
+                    if ((player.realizedCreature as Player).FreeHand() > -1)
+                    {
+                        (player.realizedCreature as Player).SlugcatGrab(spear.realizedObject, (player.realizedCreature as Player).FreeHand());
+                    }
+                }
+                else
+                    (player.realizedCreature as Player).Regurgitate();
             }
         }
     }
