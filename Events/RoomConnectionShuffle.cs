@@ -24,7 +24,11 @@ namespace RainWorldCE.Events
 
         public override void PlayerChangingRoomTrigger(ref ShortcutHandler self, ref Creature creature, ref Room room, ref ShortcutData shortCut)
         {
-            AbstractRoom targetRoom = EventHelpers.RandomRegionRoom();
+            //Find random room that isn't our room
+            AbstractRoom targetRoom;
+            do
+                targetRoom = EventHelpers.RandomRegionRoom();
+            while (targetRoom.index == room.abstractRoom.index);
 
             if (TryGetConfigAsBool("restoreConnections") && !roomBackup.ContainsKey(targetRoom))
             {
@@ -58,8 +62,10 @@ namespace RainWorldCE.Events
         {
             get
             {
-                List<EventConfigEntry> options = new List<EventConfigEntry>();
-                options.Add(new BooleanConfigEntry("Restore connections?", "Restore room connection at end of event?", "restoreConnections", false, this));
+                List<EventConfigEntry> options = new List<EventConfigEntry>
+                {
+                    new BooleanConfigEntry("Restore connections?", "Restore room connection at end of event?", "restoreConnections", true, this)
+                };
                 return options;
             }
         }

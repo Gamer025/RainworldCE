@@ -29,12 +29,16 @@ namespace RainWorldCE.Events
             if (rnd.Next(100) < chance)
             {
 
-                AbstractCreature oldCreature = EventHelpers.CurrentRoom.creatures.Where(
-                    x => x.creatureTemplate.type != CreatureTemplate.Type.Slugcat &&
+                List<AbstractCreature> oldCreatures = EventHelpers.CurrentRoom.creatures.Where(x => 
+                    x.creatureTemplate.type != CreatureTemplate.Type.Slugcat &&
                     x.creatureTemplate.type != CreatureTemplate.Type.Overseer &&
                     x.creatureTemplate.type != CreatureTemplate.Type.DaddyLongLegs &&
                     x.creatureTemplate.type != CreatureTemplate.Type.Fly)
-                    .FirstOrDefault();
+                    .ToList();
+                if (TryGetConfigAsBool("excludePups"))
+                    oldCreatures = oldCreatures.Where(x => x.creatureTemplate.type != MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.SlugNPC).ToList();
+                AbstractCreature oldCreature = oldCreatures.FirstOrDefault();
+
                 if (oldCreature is null)
                 {
                     //No DLL has yet been spawned, create a new one
@@ -134,7 +138,8 @@ namespace RainWorldCE.Events
             {
                 List<EventConfigEntry> options = new List<EventConfigEntry>
                 {
-                    new BooleanConfigEntry("Restore creatures?", "Restore the original creatures at the end of the event?", "restoreCreatures", false, this)
+                    new BooleanConfigEntry("Restore creatures?", "Restore the original creatures at the end of the event?", "restoreCreatures", false, this),
+                    new BooleanConfigEntry("Exclude slugpups?", "Prevent slugpups from being rotten?", "excludePups", true, this)
                 };
                 return options;
             }

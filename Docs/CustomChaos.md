@@ -18,10 +18,12 @@ You have entered an invalid command in that line (WAIT without time, Non existin
 Internal event names to be used in scripts:  
 CreatureMigration - Coming through  
 CreatureRandomizer - DNA Mutations  
-Darkness - Darkness / Shaded Region  
+Darkness - Darkness / Shaded Region
+FlipCamera - Camera issues    
 FoodLevel - Digestive reordering  
 Friend - The Friend  
 Gift - A small/normal/great gift  
+Grayscale - Gray World
 Hiccup - Hiccup  
 Hunger - Unending Hunger  
 InvertControls - Directional confusion  
@@ -35,13 +37,15 @@ PaletteRandomizer - Too many mushrooms
 RainbowCat - Rainbow Cat  
 RainyDay - Rainy day  
 RandomLorePearl - A piece of history
-Rifle - Free gun    
+RandomSong - Jukebox Hero  
+Rifle - Free gun  
 RoomConnectionShuffle - Geographic issues  
-Rot - The Rot
+Rot - The Rot  
 ScavConvention - Annual scavenger convention  
 ScavengerGang - Kill squad  
 SecondChance - Second Chance  
 SecretEvent - Secret event  
+Slugpup - The Mother  
 SpawnRedLizard - Danger lurks around  
 SpearMaster - Spear Master  
 Speed - Speeeeed  

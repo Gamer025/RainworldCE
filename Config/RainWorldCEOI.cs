@@ -189,7 +189,7 @@ namespace RainWorldCE.Config
                     {
                         foreach (UIelement element in entry.CMelement(new Vector2(40f, configY)))
                         {
-                            Tabs[2].AddItems(element);
+                            eventConfigSB.AddItems(element);
                         }
                         sbContentSize += entry.size;
                         configY -= entry.size;
@@ -197,6 +197,7 @@ namespace RainWorldCE.Config
                     configY -= 30f;
                 }
             }
+            eventConfigSB.SetContentSize(sbContentSize);
         }
 
         private void OpenModFolder(UIfocusable trigger)

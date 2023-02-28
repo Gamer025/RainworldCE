@@ -14,7 +14,7 @@ namespace RainWorldCE.Events
         public Rifle()
         {
             _name = "Free gun";
-            _description = "Let the slaughter beging";
+            _description = "Let the slaughter begin";
         }
 
         public override void StartupTrigger()

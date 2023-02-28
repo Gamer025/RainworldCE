@@ -13,11 +13,12 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Security.Permissions;
+
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
 
 namespace RainWorldCE;
 
-[BepInPlugin(MOD_ID, "Rain World Chaos Edition", "2.1.1")]
+[BepInPlugin(MOD_ID, "Rain World Chaos Edition", "2.2.0")]
 public class RainWorldCE : BaseUnityPlugin
 {
     public const string MOD_ID = "Gamer025.RainworldCE";
@@ -91,6 +92,8 @@ public class RainWorldCE : BaseUnityPlugin
     /// Mod is running in CustomChaos mods and events are file driven
     /// </summary>
     public static bool CCMode = false;
+
+    public static UnityEngine.AssetBundle CEAssetBundle;  
     static readonly Random rnd = new Random();
 
     public RainWorldCE()
@@ -108,26 +111,8 @@ public class RainWorldCE : BaseUnityPlugin
 
     public void OnEnable()
     {
-        ME.Logger_p.Log(LogLevel.Info, "RainWorldCE enabled");
-
-        //Used for starting up everything
-        On.RainWorldGame.ctor += RainWorldGameCtorHook;
-        //Triggers for resetting CEs state
-        On.RainWorldGame.ExitGame += RainWorldGameExitGameHook;
-        On.RainWorldGame.Win += RainWorldGameWinHook;
-        //Add own HUD to the game
-        On.HUD.HUD.InitSinglePlayerHud += HUDInitSinglePlayerHudHook;
-        //Needed for fixing teleports
-        On.ShortcutHandler.TeleportingCreatureArrivedInRealizedRoom += ShortcutHandler_TeleportingCreatureArrivedInRealizedRoom;
-
-        //Used as trigger for PlayerChangingRoomTrigger
-        On.ShortcutHandler.SuckInCreature += ShortcutHandlerSuckInCreatureHook;
-        //Used as trigger for PlayerChangedRoomTrigger
-        On.RoomCamera.ChangeRoom += RoomCameraChangeRoomHook;
-
         On.RainWorld.OnModsInit += OnModsInitHook;
     }
-
     //Start at -1 to give the game some time to start up fully
     static float timepool = -1;
     void Update()
@@ -504,16 +489,47 @@ public class RainWorldCE : BaseUnityPlugin
         }
     }
 
-    bool OIRegisted = false;
+    bool initDone = false;
     private void OnModsInitHook(On.RainWorld.orig_OnModsInit orig, RainWorld self)
     {
         orig(self);
-        if (!OIRegisted)
+        if (!initDone)
         {
-            MachineConnector.SetRegisteredOI(MOD_ID, new RainWorldCEOI());
-            OIRegisted = true;
+            ME.Logger_p.Log(LogLevel.Info, "RainWorldCE init");
+            try
+            {
+                MachineConnector.SetRegisteredOI(MOD_ID, new RainWorldCEOI());
+            }
+            catch (Exception e)
+            {
+                ME.Logger_p.Log(LogLevel.Info, $"Error creating options interface:\n {e}");
+            }
+            //Used for starting up everything
+            On.RainWorldGame.ctor += RainWorldGameCtorHook;
+            //Triggers for resetting CEs state
+            On.RainWorldGame.ExitGame += RainWorldGameExitGameHook;
+            On.RainWorldGame.Win += RainWorldGameWinHook;
+            //Add own HUD to the game
+            On.HUD.HUD.InitSinglePlayerHud += HUDInitSinglePlayerHudHook;
+            //Needed for fixing teleports
+            On.ShortcutHandler.TeleportingCreatureArrivedInRealizedRoom += ShortcutHandler_TeleportingCreatureArrivedInRealizedRoom;
+
+            //Used as trigger for PlayerChangingRoomTrigger
+            On.ShortcutHandler.SuckInCreature += ShortcutHandlerSuckInCreatureHook;
+            //Used as trigger for PlayerChangedRoomTrigger
+            On.RoomCamera.ChangeRoom += RoomCameraChangeRoomHook;
+
+            //Load asset bundle containing shaders, can only loaded once otherwise error
+             CEAssetBundle = UnityEngine.AssetBundle.LoadFromFile(AssetManager.ResolveFilePath("AssetBundles/gamer025.rainworldce.assets"));
+            if (CEAssetBundle == null)
+            {
+                ME.Logger_p.Log(LogLevel.Error, $"RainWorldCE: Failed to load AssetBundle from {AssetManager.ResolveFilePath("AssetBundles/gamer025.rainworldce.assets")}");
+                Destroy(this);
+            }
+            ME.Logger_p.Log(LogLevel.Debug, $"Assetbundle content: {String.Join(", ", CEAssetBundle.GetAllAssetNames())}");
+
+            initDone = true;
         }
-        
     }
 
     #endregion
@@ -531,10 +547,16 @@ public class RainWorldCE : BaseUnityPlugin
         return objects;
     }
 
+    /// <summary>
+    /// Get all chaos events that are valid for random selection
+    /// </summary>
+    /// <returns></returns>
     public static IEnumerable<Type> GetAllCEEventTypes()
     {
         IEnumerable<Type> eventTypes =
             GetEnumerableOfType<CEEvent>().Where(x => !x.IsDefined(typeof(InternalCEEvent), true));
+        if (!ModManager.MSC)
+            eventTypes = eventTypes.Where(x => !x.IsDefined(typeof(MSCEvent), true));
         return eventTypes;
     }
 }

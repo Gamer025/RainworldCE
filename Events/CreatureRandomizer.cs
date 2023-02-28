@@ -16,14 +16,18 @@ namespace RainWorldCE.Events
     /// </summary>
     internal class CreatureRandomizer : CEEvent
     {
-
-        List<CreatureTemplate.Type> possibleCreatures = new List<CreatureTemplate.Type>();
         Dictionary<AbstractCreature, AbstractCreature> restore = new Dictionary<AbstractCreature, AbstractCreature>();
         public CreatureRandomizer()
         {
             _name = "DNA Mutations";
             _description = "Was that thing always here?";
             _activeTime = (int)(60 * RainWorldCE.eventDurationMult);
+        }
+
+
+        public override void PlayerChangedRoomTrigger(ref RoomCamera self, ref Room room, ref int camPos)
+        {
+            List<CreatureTemplate.Type> possibleCreatures = new List<CreatureTemplate.Type>();
             CreatureTemplate.Type[] creatureTypes = Helpers.GetAllValues<CreatureTemplate.Type>();
             possibleCreatures.AddRange(creatureTypes);
             possibleCreatures.Remove(CreatureTemplate.Type.Deer);
@@ -35,17 +39,18 @@ namespace RainWorldCE.Events
             if (ModManager.MSC)
             {
                 possibleCreatures.Remove(MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.StowawayBug);
+                if (TryGetConfigAsBool("excludePups"))
+                    possibleCreatures.Remove(MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.SlugNPC);
             }
-        }
 
-
-        public override void PlayerChangedRoomTrigger(ref RoomCamera self, ref Room room, ref int camPos)
-        {
             AbstractRoom movingTo = room.abstractRoom;
             for (int i = movingTo.creatures.Count - 1; i >= 0; i--)
             {
                 AbstractCreature oldCreature = movingTo.creatures[i];
-                if (oldCreature.creatureTemplate.type == CreatureTemplate.Type.Slugcat || oldCreature.creatureTemplate.type == CreatureTemplate.Type.Overseer || oldCreature.creatureTemplate.type == CreatureTemplate.Type.Deer) continue;
+                if (oldCreature.creatureTemplate.type == CreatureTemplate.Type.Slugcat ||
+                    oldCreature.creatureTemplate.type == CreatureTemplate.Type.Overseer ||
+                    oldCreature.creatureTemplate.type == CreatureTemplate.Type.Deer ||
+                    (oldCreature.creatureTemplate.type == MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.SlugNPC && TryGetConfigAsBool("excludePups"))) continue;
 
                 WriteLog(LogLevel.Debug, $"Found {oldCreature} , pos: {oldCreature.pos}");
                 CreatureTemplate.Type type = possibleCreatures[rnd.Next(possibleCreatures.Count)];
@@ -136,7 +141,8 @@ namespace RainWorldCE.Events
             {
                 List<EventConfigEntry> options = new List<EventConfigEntry>
                 {
-                    new BooleanConfigEntry("Restore creatures?", "Restore the original creatures at the end of the event?", "restoreCreatures", false, this)
+                    new BooleanConfigEntry("Restore creatures?", "Restore the original creatures at the end of the event?", "restoreCreatures", false, this),
+                    new BooleanConfigEntry("Exclude slugpups?", "Excludes slugpups from being randomized?", "excludePups", true, this)
                 };
                 return options;
             }
