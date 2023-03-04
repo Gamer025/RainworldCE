@@ -9,6 +9,9 @@ using System.CodeDom;
 
 namespace RainWorldCE.Events
 {
+    /// <summary>
+    /// Makes the room grayscale by adding the Desaturation room effect
+    /// </summary>
     internal class Grayscale : CEEvent
     {
         public Grayscale()

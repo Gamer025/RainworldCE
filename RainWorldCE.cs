@@ -5,6 +5,7 @@ using RainWorldCE.Attributes;
 using RainWorldCE.Config;
 using RainWorldCE.Config.CustomChaos;
 using RainWorldCE.Events;
+using RainWorldCE.PostProcessing;
 using RainWorldCE.RWHUD;
 using System;
 using System.Collections.Generic;
@@ -13,12 +14,11 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Security.Permissions;
-
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
 
 namespace RainWorldCE;
 
-[BepInPlugin(MOD_ID, "Rain World Chaos Edition", "2.2.0")]
+[BepInPlugin(MOD_ID, "Rain World Chaos Edition", "2.2.1")]
 public class RainWorldCE : BaseUnityPlugin
 {
     public const string MOD_ID = "Gamer025.RainworldCE";
@@ -93,7 +93,7 @@ public class RainWorldCE : BaseUnityPlugin
     /// </summary>
     public static bool CCMode = false;
 
-    public static UnityEngine.AssetBundle CEAssetBundle;  
+    public static UnityEngine.AssetBundle CEAssetBundle;
     static readonly Random rnd = new Random();
 
     public RainWorldCE()
@@ -502,7 +502,7 @@ public class RainWorldCE : BaseUnityPlugin
             }
             catch (Exception e)
             {
-                ME.Logger_p.Log(LogLevel.Info, $"Error creating options interface:\n {e}");
+                ME.Logger_p.Log(LogLevel.Error, $"Error creating options interface:\n {e}");
             }
             //Used for starting up everything
             On.RainWorldGame.ctor += RainWorldGameCtorHook;
@@ -514,20 +514,32 @@ public class RainWorldCE : BaseUnityPlugin
             //Needed for fixing teleports
             On.ShortcutHandler.TeleportingCreatureArrivedInRealizedRoom += ShortcutHandler_TeleportingCreatureArrivedInRealizedRoom;
 
+            //Used for creating PostProcessing container
+            On.RoomCamera.ctor += RoomCameraExtension.RoomCameraCtorHook;
+            //Used for updating PostProcessing effects
+            On.RoomCamera.DrawUpdate += RoomCameraExtension.RoomCameraDrawUpdateHook;
             //Used as trigger for PlayerChangingRoomTrigger
             On.ShortcutHandler.SuckInCreature += ShortcutHandlerSuckInCreatureHook;
             //Used as trigger for PlayerChangedRoomTrigger
             On.RoomCamera.ChangeRoom += RoomCameraChangeRoomHook;
+            
 
             //Load asset bundle containing shaders, can only loaded once otherwise error
-             CEAssetBundle = UnityEngine.AssetBundle.LoadFromFile(AssetManager.ResolveFilePath("AssetBundles/gamer025.rainworldce.assets"));
-            if (CEAssetBundle == null)
+            try
             {
-                ME.Logger_p.Log(LogLevel.Error, $"RainWorldCE: Failed to load AssetBundle from {AssetManager.ResolveFilePath("AssetBundles/gamer025.rainworldce.assets")}");
-                Destroy(this);
+                CEAssetBundle = UnityEngine.AssetBundle.LoadFromFile(AssetManager.ResolveFilePath("AssetBundles/gamer025.rainworldce.assets"));
+                if (CEAssetBundle == null)
+                {
+                    ME.Logger_p.Log(LogLevel.Error, $"RainWorldCE: Failed to load AssetBundle from {AssetManager.ResolveFilePath("AssetBundles/gamer025.rainworldce.assets")}");
+                    Destroy(this);
+                }
+                ME.Logger_p.Log(LogLevel.Debug, $"Assetbundle content: {String.Join(", ", CEAssetBundle.GetAllAssetNames())}");
+                self.Shaders.Add("FlipScreenPP", FShader.CreateShader("FlipScreenPP", CEAssetBundle.LoadAsset<UnityEngine.Shader>("flipscreen.shader")));
             }
-            ME.Logger_p.Log(LogLevel.Debug, $"Assetbundle content: {String.Join(", ", CEAssetBundle.GetAllAssetNames())}");
-
+            catch (Exception e)
+            {
+                ME.Logger_p.Log(LogLevel.Error, $"Error loading asset bundle:\n {e}");
+            }
             initDone = true;
         }
     }

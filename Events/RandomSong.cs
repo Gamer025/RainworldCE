@@ -8,6 +8,10 @@ using System.Threading.Tasks;
 
 namespace RainWorldCE.Events
 {
+
+    /// <summary>
+    /// Triggers a random song from the expedition jukebox library
+    /// </summary>
     internal class RandomSong : CEEvent
     {
         public RandomSong()

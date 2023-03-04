@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RainWorldCE.PostProcessing;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,7 +10,7 @@ using UnityEngine;
 namespace RainWorldCE.Events
 {
     /// <summary>
-    /// Flips the camera either by y or x
+    /// Flips the camera either by y
     /// </summary>
     internal class FlipCamera : CEEvent
     {
@@ -22,55 +23,62 @@ namespace RainWorldCE.Events
 
         public override void StartupTrigger()
         {
-           foreach (Camera camera in Camera.allCameras)
+            foreach (RoomCamera camera in game.cameras)
             {
-                camera.gameObject.AddComponent<FlipShaderRender>();
+                camera.AddPPEffect(new FlipScreenEffect());
             }
         }
 
         public override void ShutdownTrigger()
         {
-            foreach (Camera camera in Camera.allCameras)
+            foreach (RoomCamera camera in game.cameras)
             {
-                var behaviour = camera.gameObject.GetComponent<FlipShaderRender>();
-                Component.Destroy(behaviour);
+                camera.RemovePPEffect(typeof(FlipScreenEffect));
             }
         }
     }
 
-    public class FlipShaderRender : MonoBehaviour
+    public class FlipScreenEffect : IDrawable
     {
-        // Start is called before the first frame update
-        private Material material;
-
-        // Creates a private material used to the effect
-        void Awake()
-        {
-           
-            var shader = RainWorldCE.CEAssetBundle.LoadAsset<Shader>("flipscreen.shader");
-            material = new Material(shader);
-        }
-
         float yFlip = 0;
         bool done;
-        // Postprocess the image
-        void OnRenderImage(RenderTexture source, RenderTexture destination)
+
+        public void AddToContainer(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, FContainer newContatiner)
+        {
+            rCam.ReturnFContainer("PostProcessing").AddChild(sLeaser.sprites[0]);
+        }
+
+        public void ApplyPalette(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, RoomPalette palette)
+        {
+        }
+
+        public void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
         {
             if (!done)
             {
                 yFlip += 0.020f;
-                material.SetFloat("_FlipY", yFlip);
+                Shader.SetGlobalFloat("Gamer025_YFlip", yFlip);
 
                 if (yFlip > 1f)
                 {
                     yFlip = 1f;
                     done = true;
-                    material.SetFloat("_FlipY", yFlip);
+                    Shader.SetGlobalFloat("Gamer025_YFlip", yFlip);
                 }
             }
-            
-            
-            Graphics.Blit(source, destination, material);
+
+        }
+
+        public void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
+        {
+            sLeaser.sprites = new FSprite[1];
+            sLeaser.sprites[0] = new FSprite("Futile_White");
+            sLeaser.sprites[0].shader = rCam.game.rainWorld.Shaders["FlipScreenPP"];
+            sLeaser.sprites[0].scaleX = rCam.game.rainWorld.options.ScreenSize.x / 16f;
+            sLeaser.sprites[0].scaleY = 48f;
+            sLeaser.sprites[0].anchorX = 0f;
+            sLeaser.sprites[0].anchorY = 0f;
+            AddToContainer(sLeaser, rCam, null);
         }
     }
 }
