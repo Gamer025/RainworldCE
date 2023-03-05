@@ -40,7 +40,7 @@ namespace RainWorldCE.Config.CustomChaos
                 loop++;
                 if (loop > 100)
                 {
-                    RainWorldCE.ME.Logger_p.Log(LogLevel.Error, "[CustomChaos] Possible loop detected aborting. Make sure to add PAUSE statements inside your goto loop");
+                    RainWorldCE.ME.Logger_p.Log(LogLevel.Error, "[CustomChaos] Possible loop detected aborting. Make sure to add WAIT statements inside your goto loop");
                     nextTrigger = Int32.MaxValue;
                 }
             }
