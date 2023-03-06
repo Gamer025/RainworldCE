@@ -30,15 +30,21 @@ namespace RainWorldCE.Events
                 targetRoom = EventHelpers.RandomRegionRoom();
             while (targetRoom.index == room.abstractRoom.index);
 
-            if (TryGetConfigAsBool("restoreConnections") && !roomBackup.ContainsKey(targetRoom))
-            {
+            //Just always backup the connections and only restore if config set
+            if (!roomBackup.ContainsKey(targetRoom))
                 roomBackup.Add(targetRoom, (int[])targetRoom.connections.Clone());
-            }
+            if (!roomBackup.ContainsKey(room.abstractRoom))
+                roomBackup.Add(room.abstractRoom, (int[])room.abstractRoom.connections.Clone());
+
             //Does this https://cdn.discordapp.com/attachments/484188983061118977/1000807292154945606/unknown.png
             int targetRoomNodeIndex = rnd.Next(0, targetRoom.connections.Length);
             AbstractRoom targetRoomOrigDestRoom = room.world.GetAbstractRoom(targetRoom.connections[targetRoomNodeIndex]);
+            if (!roomBackup.ContainsKey(targetRoomOrigDestRoom))
+                roomBackup.Add(targetRoomOrigDestRoom, (int[])targetRoomOrigDestRoom.connections.Clone());
             int targetRoomOrigDestRoomNodeIndex = targetRoomOrigDestRoom.ExitIndex(targetRoom.index);
             AbstractRoom ourRoomOrigDestRoom = room.world.GetAbstractRoom(room.abstractRoom.connections[shortCut.destNode]);
+            if (!roomBackup.ContainsKey(ourRoomOrigDestRoom))
+                roomBackup.Add(ourRoomOrigDestRoom, (int[])ourRoomOrigDestRoom.connections.Clone());
             int ourRoomOrigDestRoomNodeIndex = ourRoomOrigDestRoom.ExitIndex(room.abstractRoom.index);
             targetRoom.connections[targetRoomNodeIndex] = room.abstractRoom.index;
             room.abstractRoom.connections[shortCut.destNode] = targetRoom.index;
