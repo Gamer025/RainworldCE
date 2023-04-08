@@ -18,7 +18,7 @@ using System.Security.Permissions;
 
 namespace RainWorldCE;
 
-[BepInPlugin(MOD_ID, "Rain World Chaos Edition", "2.3.2")]
+[BepInPlugin(MOD_ID, "Rain World Chaos Edition", "2.3.3")]
 public class RainWorldCE : BaseUnityPlugin
 {
     public const string MOD_ID = "Gamer025.RainworldCE";
@@ -77,7 +77,7 @@ public class RainWorldCE : BaseUnityPlugin
     /// <summary>
     /// CE will only Update() (create events/call event triggers etc.) if game is active
     /// </summary>
-    private static bool gameRunning = false;
+    private static bool CEactive = false;
     //Rainworld game loop
     private RainWorldGame game;
     /// <summary>
@@ -118,7 +118,7 @@ public class RainWorldCE : BaseUnityPlugin
     void Update()
     {
         //Only tick if the game seems to be running and is in story mode
-        if (gameRunning && game.IsStorySession && game.pauseMenu == null && game.AllowRainCounterToTick())
+        if (CEactive && game.IsStorySession && game.pauseMenu == null && game.AllowRainCounterToTick())
         {
             timepool += UnityEngine.Time.deltaTime;
             //We only need second precision, so lets only do stuff every full second
@@ -184,7 +184,7 @@ public class RainWorldCE : BaseUnityPlugin
         {
             eventClass = typeof(NoEventsEnabled);
             //Disalbe CE since we have nothign to do
-            gameRunning = false;
+            CEactive = false;
             return eventClass;
         }
 
@@ -304,7 +304,7 @@ public class RainWorldCE : BaseUnityPlugin
     void ResetState()
     {
         RainWorldCE.ME.Logger_p.Log(LogLevel.Debug, $"Resetting state");
-        gameRunning = false;
+        CEactive = false;
         gameTimer = 0;
         CETriggerTime = 0;
         eventCounter = 0;
@@ -400,7 +400,7 @@ public class RainWorldCE : BaseUnityPlugin
             blockedEvents = Array.Empty<Type>();
         }
 
-        gameRunning = true;
+        CEactive = true;
     }
 
     void RainWorldGameExitGameHook(On.RainWorldGame.orig_ExitGame orig, RainWorldGame self, bool asDeath, bool asQuit)
@@ -427,8 +427,8 @@ public class RainWorldCE : BaseUnityPlugin
                 }
                 catch (Exception e)
                 {
-                    RainWorldCE.ME.Logger_p.Log(LogLevel.Error, $"Error during '{activeEvent.Name}' PlayerChangingRoomTrigger, removing event");
-                    RainWorldCE.ME.Logger_p.Log(LogLevel.Error, e.ToString());
+                    ME.Logger_p.Log(LogLevel.Error, $"Error during '{activeEvent.Name}' PlayerChangingRoomTrigger, removing event");
+                    ME.Logger_p.Log(LogLevel.Error, e.ToString());
                     ShutdownCEEvent(activeEvent);
                 }
 
@@ -440,6 +440,27 @@ public class RainWorldCE : BaseUnityPlugin
     void RoomCameraChangeRoomHook(On.RoomCamera.orig_ChangeRoom orig, RoomCamera self, Room room, int camPos)
     {
         orig(self, room, camPos);
+        //Check if room has important story elements and pause if true
+        CEactive = true;
+        for (int i = 0; i < room.physicalObjects.Length; i++)
+        {
+            for (int j = 0; j < room.physicalObjects[i].Count; j++)
+            {
+                ME.Logger_p.Log(LogLevel.Debug, room.physicalObjects[i][j]);
+                if (room.physicalObjects[i][j] is Oracle)
+                {
+                    CEactive = false;
+                }
+            }
+        }
+        foreach (IDrawable drawable in room.drawableObjects)
+        {
+            if (drawable is Ghost)
+            {
+                CEactive = false;
+            }
+        }
+
         foreach (CEEvent activeEvent in activeEvents)
         {
             if (activeEvent.ImplementsMethod("PlayerChangedRoomTrigger"))
