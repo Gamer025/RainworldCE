@@ -75,17 +75,15 @@ namespace RainWorldCE.RWHUD
             }
 
         }
-        /// <summary>
-        /// Used with timeDelta to get consistent execution time
-        /// </summary>
-        float timePool = 0;
+
+        int timePool = 0;
         int displayCounter = 0;
-        //timeStacker is delatime * 'framesPerSecond' (40)
-        public override void Draw(float timeStacker)
+        //Should be called 40 times a second
+        public override void Update()
         {
-            timePool += timeStacker;
+            timePool += 1;
             //Should run about every 100ms assuming FPS is fine
-            if (timePool > 3f)
+            if (timePool >= 4)
             {
                 //Show random event names if selection in progress
                 if (eventSelection)
@@ -105,7 +103,7 @@ namespace RainWorldCE.RWHUD
                     }
 
                 }
-                timePool -= 4f;
+                timePool -= 4;
                 //FPS seem to be really low / game window was froozen, reset timePool
                 if (timePool > 4f) timePool = 0;
             }
