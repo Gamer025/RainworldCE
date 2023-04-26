@@ -46,7 +46,7 @@ namespace RainWorldCE.RWHUD
             RainWorldCE.CEHUD = this;
             rand = new Random();
             //Event name label
-            eventNameLabel = new FLabel("font", String.Empty)
+            eventNameLabel = new FLabel(RWCustom.Custom.GetFont(), String.Empty)
             {
                 y = hud.rainWorld.screenSize.y * 0.15f,
                 x = hud.rainWorld.screenSize.x / 2,
@@ -54,7 +54,7 @@ namespace RainWorldCE.RWHUD
             };
             hud.fContainers[1].AddChild(eventNameLabel);
             //Event description label
-            eventDescriptionLabel = new FLabel("font", String.Empty)
+            eventDescriptionLabel = new FLabel(RWCustom.Custom.GetFont(), String.Empty)
             {
                 y = eventNameLabel.y - 30f,
                 x = hud.rainWorld.screenSize.x / 2,
@@ -131,7 +131,7 @@ namespace RainWorldCE.RWHUD
         /// <param name="eventName"></param>
         public void AddActiveEvent(string eventName)
         {
-            FLabel newActiveEventLabel = new FLabel("font", eventName)
+            FLabel newActiveEventLabel = new FLabel(RWCustom.Custom.GetFont(), eventName)
             {
                 x = hud.rainWorld.screenSize.y * 0.01f,
                 y = 150f + 30f * activeEventLabels.Count,

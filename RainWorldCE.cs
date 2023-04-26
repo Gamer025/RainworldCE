@@ -18,7 +18,7 @@ using System.Security.Permissions;
 
 namespace RainWorldCE;
 
-[BepInPlugin(MOD_ID, "Rain World Chaos Edition", "2.3.4")]
+[BepInPlugin(MOD_ID, "Rain World Chaos Edition", "2.3.5")]
 public class RainWorldCE : BaseUnityPlugin
 {
     public const string MOD_ID = "Gamer025.RainworldCE";
