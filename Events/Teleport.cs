@@ -27,6 +27,11 @@ namespace RainWorldCE.Events
 
         public override void StartupTrigger()
         {
+            if (EventHelpers.CurrentRoom.realizedRoom.shelterDoor != null && EventHelpers.CurrentRoom.realizedRoom.shelterDoor.IsClosing)
+            {
+                WriteLog(LogLevel.Debug, $"Cycle about to end, abort teleport");
+                return;
+            }
             if (target.realizedRoom == null)
             {
                 target.RealizeRoom(game.world, game);
