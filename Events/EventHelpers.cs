@@ -58,6 +58,15 @@ namespace RainWorldCE.Events
         {
             get
             {
+                //Get first alive player
+                foreach (AbstractCreature player in CEEvent.game.Players)
+                {
+                    if (!player?.realizedCreature.dead ?? false)
+                    {
+                        return player;
+                    }
+                }
+                //Failsafe
                 return CEEvent.game.Players[0];
             }
         }

@@ -32,13 +32,24 @@ namespace RainWorldCE.Events
 
         public void MainLoopProcessRawUpdateHook(On.MainLoopProcess.orig_RawUpdate orig, MainLoopProcess self, float dt)
         {
-            //WriteLog(LogLevel.Info, $"Total vel: {helper.MainPlayer.realizedCreature.mainBodyChunk.vel.y + helper.MainPlayer.realizedCreature.mainBodyChunk.vel.x}");
-            self.framesPerSecond = Math.Min(40, Math.Max(10, (int)Math.Abs(EventHelpers.MainPlayer.realizedCreature.mainBodyChunk.vel.y*5) + (int)Math.Abs(EventHelpers.MainPlayer.realizedCreature.mainBodyChunk.vel.x * 10)));
-            if (EventHelpers.MainPlayer.realizedCreature.inShortcut ||
-               (EventHelpers.MainPlayer.realizedCreature as Player).eatCounter < 40)
+            int totalMovement = 0;
+            int count = 0;
+            foreach (AbstractCreature player in EventHelpers.AllPlayers)
             {
-                self.framesPerSecond = 30;
+                if (!player?.realizedCreature.dead ?? false)
+                {
+                    if (player.realizedCreature.inShortcut || (player.realizedCreature as Player).eatCounter < 40)
+                    {
+                        self.framesPerSecond = 30;
+                        orig(self, dt);
+                        return;
+                    }
+                    totalMovement += Math.Max(10, (int)Math.Abs(player.realizedCreature.mainBodyChunk.vel.y * 5) + (int)Math.Abs(player.realizedCreature.mainBodyChunk.vel.x * 10));
+                    count++;
+                }
             }
+            totalMovement /= count;
+            self.framesPerSecond = Math.Min(40, totalMovement);
             orig(self, dt);
         }
     }
