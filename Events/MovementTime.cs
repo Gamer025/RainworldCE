@@ -48,8 +48,11 @@ namespace RainWorldCE.Events
                     count++;
                 }
             }
-            totalMovement /= count;
-            self.framesPerSecond = Math.Min(40, totalMovement);
+            if (count > 0)
+            {
+                totalMovement /= count;
+                self.framesPerSecond = Math.Min(40, totalMovement);
+            }
             orig(self, dt);
         }
     }
