@@ -134,6 +134,7 @@ namespace RainWorldCE.Events
                     }
                 }
             }
+            orig(self, den);
         }
 
         private void SafePlayer()
