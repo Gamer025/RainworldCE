@@ -10,7 +10,7 @@ namespace RainWorldCE.Attributes
     /// These events only work with MSC enabled
     /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
-    internal class MSCEvent : System.Attribute
+    internal class MSCEventAttribute : System.Attribute
     {
     }
 }

@@ -38,7 +38,7 @@ namespace RainWorldCE.Events
                         case < 10:
                             return CreatureTemplate.Type.GreenLizard;
                         case < 20:
-                            return MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.SpitLizard;
+                            return MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.EelLizard;
                         case < 30:
                             return CreatureTemplate.Type.PinkLizard;
                         case < 40:

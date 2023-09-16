@@ -6,9 +6,14 @@ using System.Text;
 using System.Threading.Tasks;
 using MoreSlugcats;
 using UnityEngine;
+using RainWorldCE.Attributes;
 
 namespace RainWorldCE.Events
 {
+    /// <summary>
+    /// Gives every player a rifle and some random ammo
+    /// </summary>
+    [MSCEvent]
     internal class Rifle : CEEvent
     {
         public Rifle()

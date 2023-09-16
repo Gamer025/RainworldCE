@@ -121,12 +121,18 @@ namespace RainWorldCE.Events
 
         internal static void MakeCreatureAttackCreature(AbstractCreature attacker, AbstractCreature target)
         {
-            attacker.state.socialMemory.GetOrInitiateRelationship(target.ID).like = -1f;
-            attacker.state.socialMemory.GetOrInitiateRelationship(target.ID).tempLike = -1f;
+            if (attacker.state?.socialMemory is not null)
+            {
+                attacker.state.socialMemory.GetOrInitiateRelationship(target.ID).like = -1f;
+                attacker.state.socialMemory.GetOrInitiateRelationship(target.ID).tempLike = -1f;
+            }
             attacker.personality.aggression = 1f;
             attacker.personality.dominance = 1f;
             attacker.personality.bravery = 1f;
-            attacker.abstractAI.followCreature = target;
+            if (attacker.abstractAI is not null)
+            {
+                attacker.abstractAI.followCreature = target;
+            }
         }
 
         internal static void MakeCreatureLikeAndFollowCreature(AbstractCreature friend, AbstractCreature target)

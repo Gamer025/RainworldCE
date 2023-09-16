@@ -18,7 +18,7 @@ using System.Security.Permissions;
 
 namespace RainWorldCE;
 
-[BepInPlugin(MOD_ID, "Rain World Chaos Edition", "2.3.9")]
+[BepInPlugin(MOD_ID, "Rain World Chaos Edition", "2.4.0")]
 public class RainWorldCE : BaseUnityPlugin
 {
     public const string MOD_ID = "Gamer025.RainworldCE";
@@ -60,6 +60,10 @@ public class RainWorldCE : BaseUnityPlugin
     /// Events that can't be triggered because they happened too recently
     /// </summary>
     public static Type[] blockedEvents;
+    /// <summary>
+    /// Current position in blockedEvents
+    /// </summary>
+    static int blockedEventCounter = 0;
     /// <summary>
     /// Amount of events already triggered
     /// </summary>
@@ -118,14 +122,14 @@ public class RainWorldCE : BaseUnityPlugin
     void Update()
     {
         //Only tick if the game seems to be running and is in story mode
-        if (CEactive && game.IsStorySession && game.pauseMenu == null && game.AllowRainCounterToTick())
+        if (CEactive && game is not null && game.IsStorySession && game.pauseMenu == null && game.AllowRainCounterToTick() && game.manager.currentMainLoop is RainWorldGame)
         {
             timepool += UnityEngine.Time.deltaTime;
             //We only need second precision, so lets only do stuff every full second
             if (timepool > 1)
             {
                 timepool--;
-                RainWorldCE.ME.Logger_p.Log(LogLevel.Debug, $"{DateTime.Now:HH:mm:ss:fff} Calling SecondUpdate [{gameTimer}]");
+                //RainWorldCE.ME.Logger_p.Log(LogLevel.Debug, $"{DateTime.Now:HH:mm:ss:fff} Calling SecondUpdate [{gameTimer}]");
                 SecondUpdate();
                 gameTimer++;
             }
@@ -214,7 +218,8 @@ public class RainWorldCE : BaseUnityPlugin
         //Should fill up the array and then start overwriting the oldest blocked event
         if (blockedEvents.Length > 0)
         {
-            blockedEvents[eventCounter % blockedEvents.Length] = eventClass;
+            blockedEvents[blockedEventCounter] = eventClass;
+            blockedEventCounter = (blockedEventCounter + 1) % blockedEvents.Length;
             RainWorldCE.ME.Logger_p.Log(LogLevel.Debug, $"Blocked events: {String.Join(",", blockedEvents.OfType<Type>().Select(x => x.ToString()).ToArray())}");
         }
         return eventClass;
@@ -392,6 +397,7 @@ public class RainWorldCE : BaseUnityPlugin
             {
                 ME.Logger_p.Log(LogLevel.Debug, $"Setting blockedEvents to {blockCount} from Remix");
                 blockedEvents = new Type[blockCount];
+                blockedEventCounter = 0;
             }
         }
         else
@@ -413,6 +419,16 @@ public class RainWorldCE : BaseUnityPlugin
     {
         ResetState();
         orig(self, malnourished);
+    }
+
+    void ProcessManagerRequestMainProcessSwitchHook(On.ProcessManager.orig_RequestMainProcessSwitch_ProcessID orig, ProcessManager self, ProcessManager.ProcessID ID)
+    {
+        //Disable CE if game not in game mode
+        if (ID != ProcessManager.ProcessID.Game)
+            CEactive = false;
+        else
+            CEactive = true;
+        orig(self, ID);
     }
 
     void ShortcutHandlerSuckInCreatureHook(On.ShortcutHandler.orig_SuckInCreature orig, ShortcutHandler self, Creature creature, Room room, ShortcutData shortCut)
@@ -446,7 +462,6 @@ public class RainWorldCE : BaseUnityPlugin
         {
             for (int j = 0; j < room.physicalObjects[i].Count; j++)
             {
-                ME.Logger_p.Log(LogLevel.Debug, room.physicalObjects[i][j]);
                 if (room.physicalObjects[i][j] is Oracle)
                 {
                     CEactive = false;
@@ -530,6 +545,8 @@ public class RainWorldCE : BaseUnityPlugin
             //Triggers for resetting CEs state
             On.RainWorldGame.ExitGame += RainWorldGameExitGameHook;
             On.RainWorldGame.Win += RainWorldGameWinHook;
+            //Used to pause CE on process switch (death screen ...)
+            On.ProcessManager.RequestMainProcessSwitch_ProcessID += ProcessManagerRequestMainProcessSwitchHook;
             //Add own HUD to the game
             On.HUD.HUD.InitSinglePlayerHud += HUDInitSinglePlayerHudHook;
             //Needed for fixing teleports
@@ -543,7 +560,7 @@ public class RainWorldCE : BaseUnityPlugin
             On.ShortcutHandler.SuckInCreature += ShortcutHandlerSuckInCreatureHook;
             //Used as trigger for PlayerChangedRoomTrigger
             On.RoomCamera.ChangeRoom += RoomCameraChangeRoomHook;
-            
+
 
             //Load asset bundle containing shaders, can only loaded once otherwise error
             try
@@ -556,6 +573,8 @@ public class RainWorldCE : BaseUnityPlugin
                 }
                 ME.Logger_p.Log(LogLevel.Debug, $"Assetbundle content: {String.Join(", ", CEAssetBundle.GetAllAssetNames())}");
                 self.Shaders.Add("FlipScreenPP", FShader.CreateShader("FlipScreenPP", CEAssetBundle.LoadAsset<UnityEngine.Shader>("flipscreen.shader")));
+                self.Shaders.Add("MeltingPP", FShader.CreateShader("MeltingPP", CEAssetBundle.LoadAsset<UnityEngine.Shader>("melt.shader")));
+                self.Shaders.Add("PixelizePP", FShader.CreateShader("PixelizePP", CEAssetBundle.LoadAsset<UnityEngine.Shader>("pixelize.shader")));
             }
             catch (Exception e)
             {
@@ -587,9 +606,9 @@ public class RainWorldCE : BaseUnityPlugin
     public static IEnumerable<Type> GetAllCEEventTypes()
     {
         IEnumerable<Type> eventTypes =
-            GetEnumerableOfType<CEEvent>().Where(x => !x.IsDefined(typeof(InternalCEEvent), true));
+            GetEnumerableOfType<CEEvent>().Where(x => !x.IsDefined(typeof(InternalCEEventAttribute), true));
         if (!ModManager.MSC)
-            eventTypes = eventTypes.Where(x => !x.IsDefined(typeof(MSCEvent), true));
+            eventTypes = eventTypes.Where(x => !x.IsDefined(typeof(MSCEventAttribute), true));
         return eventTypes;
     }
 }

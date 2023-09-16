@@ -9,7 +9,7 @@ namespace RainWorldCE.Attributes
     /// These events should never be randomly rolled
     /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
-    internal class InternalCEEvent : System.Attribute 
+    internal class InternalCEEventAttribute : System.Attribute 
     {
     }
 }

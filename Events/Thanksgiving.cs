@@ -25,8 +25,19 @@ namespace RainWorldCE.Events
             //Resets itself when cycle ends
             (EventHelpers.MainPlayer.realizedCreature as Player).AddFood(
                 (EventHelpers.MainPlayer.realizedCreature as Player).MaxFoodInStomach - (EventHelpers.MainPlayer.realizedCreature as Player).FoodInStomach);
-            game.session.characterStats.bodyWeightFac += 0.20f;
-            game.session.characterStats.runspeedFac -= 0.20f;
+            if (ModManager.CoopAvailable)
+            {
+                foreach (SlugcatStats stats in (game.session as StoryGameSession).characterStatsJollyplayer.Where(x => x is not null))
+                {
+                    stats.bodyWeightFac += 0.20f;
+                    stats.runspeedFac -= 0.20f;
+                }
+            }
+            else
+            {
+                game.session.characterStats.bodyWeightFac += 0.20f;
+                game.session.characterStats.runspeedFac -= 0.20f;
+            }
         }
     }
 }

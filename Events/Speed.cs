@@ -19,17 +19,42 @@ namespace RainWorldCE.Events
 
         public override void StartupTrigger()
         {
-            game.session.characterStats.runspeedFac += 1f;
-            game.session.characterStats.poleClimbSpeedFac += 1f;
-            game.session.characterStats.corridorClimbSpeedFac += 1f;
+            if (ModManager.CoopAvailable)
+            {
+                foreach (SlugcatStats stats in (game.session as StoryGameSession).characterStatsJollyplayer.Where(x => x is not null))
+                {
+                    stats.runspeedFac += 1f;
+                    stats.poleClimbSpeedFac += 1f;
+                    stats.corridorClimbSpeedFac += 1f;
+                }
+            }
+            else
+            {
+                game.session.characterStats.runspeedFac += 1f;
+                game.session.characterStats.poleClimbSpeedFac += 1f;
+                game.session.characterStats.corridorClimbSpeedFac += 1f;
+            }
+
         }
 
 
         public override void ShutdownTrigger()
         {
-            game.session.characterStats.runspeedFac -= 1f;
-            game.session.characterStats.poleClimbSpeedFac -= 1f;
-            game.session.characterStats.corridorClimbSpeedFac -= 1f;
+            if (ModManager.CoopAvailable)
+            {
+                foreach (SlugcatStats stats in (game.session as StoryGameSession).characterStatsJollyplayer.Where(x => x is not null))
+                {
+                    stats.runspeedFac -= 1f;
+                    stats.poleClimbSpeedFac -= 1f;
+                    stats.corridorClimbSpeedFac -= 1f;
+                }
+            }
+            else
+            {
+                game.session.characterStats.runspeedFac -= 1f;
+                game.session.characterStats.poleClimbSpeedFac -= 1f;
+                game.session.characterStats.corridorClimbSpeedFac -= 1f;
+            }
         }
     }
 }

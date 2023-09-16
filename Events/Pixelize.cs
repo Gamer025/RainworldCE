@@ -1,23 +1,19 @@
-﻿using RainWorldCE.PostProcessing;
-using System;
+﻿using RainWorldCE.Config;
+using RainWorldCE.PostProcessing;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace RainWorldCE.Events
 {
     /// <summary>
-    /// Flips the camera vertically
+    /// Pixelizes the screen
     /// </summary>
-    internal class FlipCamera : CEEvent
+    internal class Pixelize : CEEvent
     {
-        public FlipCamera()
+        public Pixelize()
         {
-            _name = "Camera issues";
-            _description = "Maybe inverted controls would be useful now?";
+            _name = "Retro";
+            _description = "Rain World finally arrived on the NES";
             _activeTime = (int)(60 * RainWorldCE.eventDurationMult);
         }
 
@@ -25,24 +21,35 @@ namespace RainWorldCE.Events
         {
             foreach (RoomCamera camera in game.cameras)
             {
-                camera.AddPPEffect(new FlipScreenEffect());
+                camera.AddPPEffect(new PixelizeEffect());
             }
+            int intensity = TryGetConfigAsInt("intensity");
+            Shader.SetGlobalFloat("Gamer025_PixelizeIntens", Mathf.Lerp(1.5f, 10f, Mathf.InverseLerp(10, 100, intensity)));
         }
 
         public override void ShutdownTrigger()
         {
             foreach (RoomCamera camera in game.cameras)
             {
-                camera.RemovePPEffect(typeof(FlipScreenEffect));
+                camera.RemovePPEffect(typeof(PixelizeEffect));
+            }
+        }
+        public override List<EventConfigEntry> ConfigEntries
+        {
+            get
+            {
+                List<EventConfigEntry> options = new List<EventConfigEntry>
+                {
+                    new IntegerConfigEntry("Intensity", "How badly the game will be retrofied", "intensity", new RWCustom.IntVector2(10, 100), 30, this)
+                };
+                return options;
             }
         }
     }
 
-    public class FlipScreenEffect : IDrawable
-    {
-        float yFlip = 0;
-        bool done;
 
+    public class PixelizeEffect : IDrawable
+    {
         public void AddToContainer(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, FContainer newContatiner)
         {
             rCam.ReturnFContainer("PostProcessing").AddChild(sLeaser.sprites[0]);
@@ -54,18 +61,6 @@ namespace RainWorldCE.Events
 
         public void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
         {
-            if (!done)
-            {
-                yFlip += 0.020f;
-                Shader.SetGlobalFloat("Gamer025_YFlip", yFlip);
-
-                if (yFlip > 1f)
-                {
-                    yFlip = 1f;
-                    done = true;
-                    Shader.SetGlobalFloat("Gamer025_YFlip", yFlip);
-                }
-            }
 
         }
 
@@ -73,7 +68,7 @@ namespace RainWorldCE.Events
         {
             sLeaser.sprites = new FSprite[1];
             sLeaser.sprites[0] = new FSprite("Futile_White");
-            sLeaser.sprites[0].shader = rCam.game.rainWorld.Shaders["FlipScreenPP"];
+            sLeaser.sprites[0].shader = rCam.game.rainWorld.Shaders["PixelizePP"];
             sLeaser.sprites[0].scaleX = rCam.game.rainWorld.options.ScreenSize.x / 16f;
             sLeaser.sprites[0].scaleY = 48f;
             sLeaser.sprites[0].anchorX = 0f;

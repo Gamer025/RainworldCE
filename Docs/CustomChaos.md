@@ -16,9 +16,10 @@ In the Remix options one of the lines shows up as ERROR:
 You have entered an invalid command in that line (WAIT without time, Non existing event name etc.) This line will do nothing and you should fix it  
 
 Internal event names to be used in scripts:  
+Challenger - Challenger  
 CreatureMigration - Coming through  
 CreatureRandomizer - DNA Mutations  
-Darkness - Darkness / Shaded Region
+Darkness - Darkness / Shaded Region  
 FlipCamera - Camera issues    
 FoodLevel - Digestive reordering  
 Friend - The Friend  
@@ -30,13 +31,16 @@ InvertControls - Directional confusion
 KarmaLevel - Karma shuffle  
 LiftOff - Lift off  
 LizardPack - The pack  
+LooseGrasp - Hot Potatoes  
 LowGravity - Low gravity  
+Melting - Extreme Heat  
 MovementTime - Super Slugcat  
 NoodleInvasion - Noodle invasion  
 PaletteRandomizer - Too many mushrooms  
+Pixelize - Retro  
 RainbowCat - Rainbow Cat  
 RainyDay - Rainy day  
-RandomLorePearl - A piece of history
+RandomLorePearl - A piece of history  
 RandomSong - Jukebox Hero  
 Rifle - Free gun  
 RoomConnectionShuffle - Geographic issues  
