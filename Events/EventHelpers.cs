@@ -1,11 +1,7 @@
-﻿using BepInEx.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Runtime.Remoting.Messaging;
-using System.Text;
-using static SlugcatStats;
 
 namespace RainWorldCE.Events
 {
@@ -114,6 +110,18 @@ namespace RainWorldCE.Events
             return returnList;
         }
 
+        internal static List<AbstractRoom> GetAllConnectedRooms(AbstractRoom room)
+        {
+            Dictionary<string, AbstractRoom> rooms =new Dictionary<string, AbstractRoom>();
+            GetConnectedRooms(room).ForEach(x => rooms[x.name] = x);
+            for (int i = 0; i < rooms.Count; i++)
+            {
+                AbstractRoom nextRoom = rooms.ElementAt(i).Value;
+                GetConnectedRooms(nextRoom).ForEach(x => rooms[x.name] = x);
+            }
+            return rooms.Values.ToList();
+        }
+
         internal static int GetNodeIdOfRoomConnection(AbstractRoom source, AbstractRoom destination)
         {
             return Array.IndexOf(destination.connections, source.index);
@@ -152,14 +160,6 @@ namespace RainWorldCE.Events
                 }
             }
             return false;
-        }
-
-        internal static bool StoryModeActive
-        {
-            get
-            {
-                return (CEEvent.game is not null && CEEvent.game.IsStorySession);
-            }
         }
     }
 }

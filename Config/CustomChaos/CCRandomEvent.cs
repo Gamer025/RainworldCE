@@ -1,10 +1,5 @@
 ﻿using RainWorldCE.Events;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
 
 namespace RainWorldCE.Config.CustomChaos
 {
@@ -19,7 +14,7 @@ namespace RainWorldCE.Config.CustomChaos
             //Need to recreate the event here and not sure it in the constructor since ctor may have run while game not active
             Type eventClass = RainWorldCE.PickEvent();
             CEEvent ceevent = (CEEvent)Activator.CreateInstance(eventClass);
-            RainWorldCE.activateEvent(ceevent);
+            RainWorldCE.ActivateEvent(ceevent);
             return 0;
         }
 

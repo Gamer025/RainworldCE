@@ -1,6 +1,5 @@
 ﻿using BepInEx;
 using BepInEx.Logging;
-using IL.Menu.Remix.MixedUI;
 using RainWorldCE.Attributes;
 using RainWorldCE.Config;
 using RainWorldCE.Config.CustomChaos;
@@ -9,7 +8,6 @@ using RainWorldCE.PostProcessing;
 using RainWorldCE.RWHUD;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.Design;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -18,7 +16,7 @@ using System.Security.Permissions;
 
 namespace RainWorldCE;
 
-[BepInPlugin(MOD_ID, "Rain World Chaos Edition", "2.4.0")]
+[BepInPlugin(MOD_ID, "Rain World Chaos Edition", "2.4.1")]
 public class RainWorldCE : BaseUnityPlugin
 {
     public const string MOD_ID = "Gamer025.RainworldCE";
@@ -150,12 +148,11 @@ public class RainWorldCE : BaseUnityPlugin
         eventCounter++;
         CEEvent selectedEvent = (CEEvent)Activator.CreateInstance(eventClass);
         RainWorldCE.ME.Logger_p.Log(LogLevel.Info, $"Triggering '{selectedEvent.Name}' event");
-        activateEvent(selectedEvent);
+        ActivateEvent(selectedEvent);
     }
 
-    public static void activateEvent(CEEvent ceevent)
+    public static void ActivateEvent(CEEvent ceevent)
     {
-        CEHUD.StopEventSelection(ceevent);
         if (ceevent.ImplementsMethod("StartupTrigger"))
         {
             RainWorldCE.ME.Logger_p.Log(LogLevel.Debug, $"Calline StartupTrigger of '{ceevent.Name}' event");
@@ -167,9 +164,12 @@ public class RainWorldCE : BaseUnityPlugin
             {
                 RainWorldCE.ME.Logger_p.Log(LogLevel.Error, $"'{ceevent.Name}' errored on startup, cancel event");
                 RainWorldCE.ME.Logger_p.Log(LogLevel.Error, e.ToString());
+                CEHUD.StopEventSelection(ceevent);
                 return;
             }
         }
+        //Stop the selecton after calling startup so that event can change its name/description before its displayed
+        CEHUD.StopEventSelection(ceevent);
         if (ceevent.ActiveTime > 0)
         {
             activeEvents.Add(ceevent);

@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Menu.Remix.MixedUI;
-using RainWorldCE.Config.CustomChaos;
 using System.IO;
 using System.Reflection;
 using RainWorldCE.RWHUD;

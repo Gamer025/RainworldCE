@@ -1,11 +1,4 @@
-﻿using BepInEx.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
-
-namespace RainWorldCE.Events
+﻿namespace RainWorldCE.Events
 {
     /// <summary>
     /// Causes all creatures in the region to migrate to the players current room

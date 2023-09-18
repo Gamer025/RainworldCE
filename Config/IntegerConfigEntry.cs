@@ -1,13 +1,6 @@
-﻿using BepInEx.Logging;
-using IL.RWCustom;
-using Menu.Remix.MixedUI;
+﻿using Menu.Remix.MixedUI;
 using RainWorldCE.Events;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
 using UnityEngine;
 
 namespace RainWorldCE.Config

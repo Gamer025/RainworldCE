@@ -1,9 +1,5 @@
 ﻿using RainWorldCE.Events;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RainWorldCE.Config.CustomChaos
 {
@@ -31,7 +27,7 @@ namespace RainWorldCE.Config.CustomChaos
             CEEvent ceevent = (CEEvent)Activator.CreateInstance(eventClass);
             if (time > 0 && ceevent.ActiveTime > 0)
                 ceevent.ActiveTime = time;
-            RainWorldCE.activateEvent(ceevent);
+            RainWorldCE.ActivateEvent(ceevent);
             return 0;
         }
 

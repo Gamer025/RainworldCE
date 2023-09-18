@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace RainWorldCE.Events
+﻿namespace RainWorldCE.Events
 {
     /// <summary>
     /// Flings the player a little bit to the left or right and upwards

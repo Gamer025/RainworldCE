@@ -1,10 +1,5 @@
 ﻿using BepInEx.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using UnityEngine;
-using static SlugcatStats;
 
 namespace RainWorldCE.Events
 {
@@ -15,19 +10,8 @@ namespace RainWorldCE.Events
     {
         public Gift()
         {
-            size = GetRandomGiftSize;
             _name = "A small/normal/great gift";
-            if (EventHelpers.StoryModeActive)
-            {
-                _name = $"A {size} gift";
-            }
-            _description = size switch
-            {
-                GiftSize.small => "Take this, it's dangerous to go alone",
-                GiftSize.normal => "You will probably need this",
-                GiftSize.big => "A great gift for an amazing little creature",
-                _ => "",
-            };
+            _description = "You will probably need this";
         }
 
         enum GiftSize
@@ -37,10 +21,19 @@ namespace RainWorldCE.Events
             big
         }
 
-        private readonly GiftSize size;
+        private GiftSize size;
 
         public override void StartupTrigger()
         {
+            size = GetRandomGiftSize;
+            _name = $"A {size} gift";
+            _description = size switch
+            {
+                GiftSize.small => "Take this, it's dangerous to go alone",
+                GiftSize.normal => "You will probably need this",
+                GiftSize.big => "A great gift for an amazing little creature",
+                _ => "",
+            };
             foreach (AbstractCreature player in EventHelpers.AllPlayers)
             {
                 AbstractPhysicalObject reward = null;

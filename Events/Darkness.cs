@@ -1,9 +1,5 @@
-﻿using BepInEx.Logging;
-using RainWorldCE.Config;
-using System;
+﻿using RainWorldCE.Config;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using UnityEngine;
 
 namespace RainWorldCE.Events
@@ -16,12 +12,6 @@ namespace RainWorldCE.Events
         public Darkness()
         {
             _name = "Darkness / Shaded Region";
-            if (EventHelpers.StoryModeActive && game.world.region is not null)
-            {
-                string regionName = Region.GetRegionFullName(game.world.region.name, (EventHelpers.MainPlayer.realizedCreature as Player).SlugCatClass);
-
-                _name = $"Shaded {regionName}";
-            }
             _description = "Darkness has fallen";
             _activeTime = (int)(60 * RainWorldCE.eventDurationMult);
         }
@@ -30,6 +20,7 @@ namespace RainWorldCE.Events
 
         public override void StartupTrigger()
         {
+            _name = $"Shaded {Region.GetRegionFullName(game.world.region.name, (EventHelpers.MainPlayer.realizedCreature as Player).SlugCatClass)}";
             amount = TryGetConfigAsInt("amount") / 100f;
             Room room = game.cameras[0].room;
             PlayerChangedRoomTrigger(ref game.cameras[0], ref room, ref game.cameras[0].currentCameraPosition);

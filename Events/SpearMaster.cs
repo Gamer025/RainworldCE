@@ -1,11 +1,4 @@
-﻿using BepInEx.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Remoting.Messaging;
-using System.Text;
-
-namespace RainWorldCE.Events
+﻿namespace RainWorldCE.Events
 {
     /// <summary>
     /// Spawns a spear on top of the player every second for 30 seconds

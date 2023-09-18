@@ -1,12 +1,4 @@
-﻿using BepInEx.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Remoting.Messaging;
-using System.Text;
-using static SlugcatStats;
-
-namespace RainWorldCE.Events
+﻿namespace RainWorldCE.Events
 {
     /// <summary>
     /// Randomly decreases or increases Karma by 1

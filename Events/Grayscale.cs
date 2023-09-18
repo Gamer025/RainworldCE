@@ -1,11 +1,5 @@
-﻿using BepInEx.Logging;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using static SlugcatStats;
-using UnityEngine;
-using System.CodeDom;
 
 namespace RainWorldCE.Events
 {

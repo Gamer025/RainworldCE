@@ -1,12 +1,4 @@
-﻿using BepInEx.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Remoting.Messaging;
-using System.Text;
-using static SlugcatStats;
-
-namespace RainWorldCE.Events
+﻿namespace RainWorldCE.Events
 {
     /// <summary>
     /// Spawns a scavenger squad trying to kill the player and makes them enter the room of the player

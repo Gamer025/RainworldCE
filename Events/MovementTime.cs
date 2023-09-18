@@ -1,10 +1,4 @@
-﻿using BepInEx.Logging;
-using Microsoft.SqlServer.Server;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using static SlugcatStats;
+﻿using System;
 
 namespace RainWorldCE.Events
 {

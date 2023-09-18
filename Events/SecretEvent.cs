@@ -1,9 +1,5 @@
 ﻿using BepInEx.Logging;
-using RainWorldCE.RWHUD;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace RainWorldCE.Events
 {

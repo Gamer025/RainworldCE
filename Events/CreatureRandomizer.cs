@@ -1,13 +1,6 @@
 ﻿using BepInEx.Logging;
-using IL;
-using IL.JollyCoop.JollyManual;
-using On;
 using RainWorldCE.Config;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Remoting.Messaging;
-using System.Text;
 
 namespace RainWorldCE.Events
 {

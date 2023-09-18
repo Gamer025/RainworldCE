@@ -1,9 +1,7 @@
-﻿using BepInEx.Configuration;
-using BepInEx.Logging;
+﻿using BepInEx.Logging;
 using RainWorldCE.Config;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 
 namespace RainWorldCE.Events
 {

@@ -1,9 +1,6 @@
 ﻿using BepInEx.Logging;
-using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
-using System.Text;
 
 namespace RainWorldCE.Events
 {
@@ -16,17 +13,17 @@ namespace RainWorldCE.Events
         {
             _name = "/tp";
             _description = "Slugcat ~ ~ ~";
-            if (EventHelpers.StoryModeActive)
-            {
-                target = EventHelpers.RandomRegionRoom();
-                _description = $"Slugcat ~ ~ ~ {target.name}";
-            }
         }
 
-        readonly AbstractRoom target;
+        AbstractRoom target;
 
         public override void StartupTrigger()
         {
+            List<AbstractRoom> rooms = EventHelpers.GetAllConnectedRooms(EventHelpers.MainPlayer.Room);
+            WriteLog(LogLevel.Debug, $"{string.Join(",", rooms.Select(x => x.name))}");
+            target = rooms[rnd.Next(rooms.Count)];
+            _description = $"Slugcat ~ ~ ~ {target.name}";
+
             if (EventHelpers.CurrentRoom.realizedRoom.shelterDoor != null && EventHelpers.CurrentRoom.realizedRoom.shelterDoor.IsClosing)
             {
                 WriteLog(LogLevel.Debug, $"Cycle about to end, abort teleport");
