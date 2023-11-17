@@ -153,6 +153,8 @@ namespace RainWorldCE.Events
                 }
 
                 game.shortcuts.CreatureTeleportOutOfRoom(player.realizedCreature, player.pos, new WorldCoordinate(lastRoom.index, -1, -1, lastRoomNode));
+                if (player.realizedCreature != null)
+                    (player.realizedCreature as Player).airInLungs = 1.0f;
             }
             _activeTime = 1;
             playerSaved = true;
