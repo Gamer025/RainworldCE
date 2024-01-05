@@ -16,7 +16,7 @@ using System.Security.Permissions;
 
 namespace RainWorldCE;
 
-[BepInPlugin(MOD_ID, "Rain World Chaos Edition", "2.4.2")]
+[BepInPlugin(MOD_ID, "Rain World Chaos Edition", "2.5.0")]
 public class RainWorldCE : BaseUnityPlugin
 {
     public const string MOD_ID = "Gamer025.RainworldCE";
@@ -29,10 +29,13 @@ public class RainWorldCE : BaseUnityPlugin
     /// </summary>
     static float CETriggerTime = 0;
     /// <summary>
-    /// Time between chaos events (CM)
+    /// Time between chaos events
     /// </summary>
-    public static Configurable<int> _eventTimeout;
-    public static int eventTimeout => _eventTimeout.Value;
+    public static Configurable<int> eventTimeout;
+    /// <summary>
+    /// Offset (negative and positive) applied to eventTimeout to randomize trigger time
+    /// </summary>
+    public static Configurable<int> eventTimeoutOffset;
     /// <summary>
     /// Percentage of events to not repeat
     /// </summary>
@@ -83,10 +86,6 @@ public class RainWorldCE : BaseUnityPlugin
     //Rainworld game loop
     private RainWorldGame game;
     /// <summary>
-    /// This is us
-    /// </summary>
-    public static RainWorldCE instance;
-    /// <summary>
     /// BepInEx Plugin Version
     /// </summary>
     public static Version modVersion;
@@ -101,7 +100,6 @@ public class RainWorldCE : BaseUnityPlugin
     public RainWorldCE()
     {
         __me = new(this);
-        instance = this;
         BepInPlugin attribute =
             (BepInPlugin)Attribute.GetCustomAttribute(typeof(RainWorldCE), typeof(BepInPlugin));
         modVersion = attribute.Version;
@@ -240,6 +238,7 @@ public class RainWorldCE : BaseUnityPlugin
         }
     }
 
+    int currentEventOffset = 0;
     /// <summary>
     /// Runs every second and triggers new chaos events / RecurringTrigger methods and expiring events 
     /// </summary>
@@ -279,15 +278,16 @@ public class RainWorldCE : BaseUnityPlugin
             if (eventCounter < maxEventCount)
             {
                 //Start the event selection HUD magic 3 seconds before the actual event
-                if (gameTimer - (CETriggerTime - 3) >= eventTimeout)
+                if (gameTimer - (CETriggerTime - 3) >= eventTimeout.Value + currentEventOffset)
                 {
                     CEHUD.StartEventSelection();
                 }
                 //Enough time has passed till last chaos event
-                if (gameTimer - CETriggerTime >= eventTimeout)
+                if (gameTimer - CETriggerTime >= eventTimeout.Value + currentEventOffset)
                 {
                     CreateNewEvent();
                     CETriggerTime = gameTimer;
+                    currentEventOffset = rnd.Next(-eventTimeoutOffset.Value, eventTimeoutOffset.Value);
                 }
             }
         }
@@ -369,7 +369,7 @@ public class RainWorldCE : BaseUnityPlugin
     {
         orig(self, manager);
         TryLoadCC();
-        ME.Logger_p.Log(LogLevel.Info, $"Starting event cycle with {eventTimeout} second timer");
+        ME.Logger_p.Log(LogLevel.Info, $"Starting event cycle with {eventTimeout.Value} second timer");
         ResetState();
         CEEvent.game = self;
         game = self;
@@ -406,6 +406,7 @@ public class RainWorldCE : BaseUnityPlugin
             blockedEvents = Array.Empty<Type>();
         }
 
+        currentEventOffset = rnd.Next(-eventTimeoutOffset.Value, eventTimeoutOffset.Value);
         CEactive = true;
     }
 

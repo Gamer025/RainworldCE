@@ -110,7 +110,6 @@ namespace RainWorldCE.Events
 
         public void CreatureEnterDenHook(On.AbstractCreature.orig_IsEnteringDen orig, AbstractCreature self, WorldCoordinate den)
         {
-            WriteLog(BepInEx.Logging.LogLevel.Debug, $"self: {self}, creaturetemp: {self.creatureTemplate}, type: {self.creatureTemplate.type}, stuckobj: {self.stuckObjects.Count}]");
             if (self.creatureTemplate.type == CreatureTemplate.Type.Slugcat)
             {
                 SafePlayer();
@@ -132,7 +131,6 @@ namespace RainWorldCE.Events
 
         private void SafePlayer()
         {
-            WriteLog(BepInEx.Logging.LogLevel.Debug, $"{new System.Diagnostics.StackTrace()}");
             if (playerSaved) return;
 
             if (lastRoom.realizedRoom == null)

@@ -71,6 +71,12 @@ namespace RainWorldCE.RWHUD
                 }
             }
 
+            if (eventDisplayTime.Value == 0)
+            {
+                eventNameLabel.isVisible = false;
+                eventDescriptionLabel.isVisible = false;
+            }
+
         }
 
         int timePool = 0;

@@ -15,11 +15,12 @@ namespace RainWorldCE.Config
     {
         public RainWorldCEOI()
         {
-            RainWorldCE._eventTimeout = config.Bind("eventTimeout", 60, new ConfigAcceptableRange<int>(10, 600));
+            RainWorldCE.eventTimeout = config.Bind("eventTimeout", 60, new ConfigAcceptableRange<int>(10, 600));
+            RainWorldCE.eventTimeoutOffset = config.Bind("eventTimeoutOffset", 15, new ConfigAcceptableRange<int>(0, 600));
             RainWorldCE.blockedEventPercent = config.Bind("blockedEventPercent", 50, new ConfigAcceptableRange<int>(0, 100));
             RainWorldCE._maxEventCount = config.Bind("maxEventCount", 200, new ConfigAcceptableRange<int>(1, 200));
             RainWorldCE._eventDurationMult = config.Bind("eventDurationMult", 10, new ConfigAcceptableRange<int>(1, 50));
-            CEHUD.eventDisplayTime = config.Bind("eventDisplayTime", 5, new ConfigAcceptableRange<int>(1, 15));
+            CEHUD.eventDisplayTime = config.Bind("eventDisplayTime", 5, new ConfigAcceptableRange<int>(0, 15));
             RainWorldCE._showActiveEvents = config.Bind("showActiveEvents", true, new ConfigurableInfo("Show active events in the bottom left?", null, "Show active events"));
 
             // Enable/Disable event checkboxes
@@ -74,48 +75,54 @@ namespace RainWorldCE.Config
             Tabs[2] = new OpTab(this, "Event Config");
 
             //Event Duration slider
-            Tabs[0].AddItems(new OpLabel(260f, 570f, "Duration between events:")
+            Tabs[0].AddItems(new OpLabel(240f, 570f, "Duration between events:")
             { description = "Duration in seconds between events." });
-            Tabs[0].AddItems(new OpSlider(RainWorldCE._eventTimeout, new Vector2(10f, 530f), 570)
+            Tabs[0].AddItems(new OpSlider(RainWorldCE.eventTimeout, new Vector2(10f, 530f), 570)
             { description = "Duration in seconds between events." });
 
+            //Event Duration Offset slider
+            Tabs[0].AddItems(new OpLabel(210f, 500f, "Offset/Random time between events:")
+            { description = "The duration between events will randomly be increased or decreased by up to this many seconds.\nFor example 15 means that every event can happen up to 15 seconds sooner or later but also 10,7,3 seconds etc." });
+            Tabs[0].AddItems(new OpSlider(RainWorldCE.eventTimeoutOffset, new Vector2(10f, 460f), 570)
+            { description = "The duration between events will randomly be increased or decreased by up to this many seconds.\nFor example 15 means that every event can happen up to 15 seconds sooner or later but also 10,7,3 seconds etc." });
+
             //Event repeat slider
-            Tabs[0].AddItems(new OpLabel(10f, 500f, "Don't repeat events for (%):")
+            Tabs[0].AddItems(new OpLabel(10f, 430f, "Don't repeat events for (%):")
             { description = "Prevent events from repeating until X% of the other enabled events triggered." });
-            Tabs[0].AddItems(new OpSlider(RainWorldCE.blockedEventPercent, new Vector2(175f, 495f), 100)
+            Tabs[0].AddItems(new OpSlider(RainWorldCE.blockedEventPercent, new Vector2(175f, 425f), 100)
             { description = "Prevent events from repeating until X% of the other enabled events triggered." });
 
             //Max events slider
-            Tabs[0].AddItems(new OpLabel(10f, 460f, "Max events per cycle:")
+            Tabs[0].AddItems(new OpLabel(10f, 400f, "Max events per cycle:")
             { description = "Maximum amount of chaos events to trigger per ingame cycle." });
-            Tabs[0].AddItems(new OpSlider(RainWorldCE._maxEventCount, new Vector2(140f, 455f), 200)
+            Tabs[0].AddItems(new OpSlider(RainWorldCE._maxEventCount, new Vector2(140f, 395f), 200)
             { description = "Maximum amount of chaos events to trigger per ingame cycle." });
 
             //Event time multiplier
-            Tabs[0].AddItems(new OpLabel(10f, 420f, "Event duration multiplier (base is 10):")
+            Tabs[0].AddItems(new OpLabel(10f, 370f, "Event duration multiplier (base is 10):")
             {
                 description = "Allows you to decrase/increase the length of some time based events.\r\n" +
             "10 is normal event length, 1 would be 10 times shorter, 50 would be 5 times longer events."
             });
-            Tabs[0].AddItems(new OpSlider(RainWorldCE._eventDurationMult, new Vector2(220f, 415f), 100)
+            Tabs[0].AddItems(new OpSlider(RainWorldCE._eventDurationMult, new Vector2(220f, 365f), 100)
             {
                 description = "Allows you to decrase/increase the length of some time based events.\r\n" +
             "10 is normal event length, 1 would be 10 times shorter, 50 would be 5 times longer events."
             });
 
             //Event display time
-            Tabs[0].AddItems(new OpLabel(10f, 380f, "Event name/description display time:")
+            Tabs[0].AddItems(new OpLabel(10f, 340f, "Event name/description display time:")
             {
                 description = "Determines how long event name and description will be displayed for, when an event gets selected in seconds."
             });
-            Tabs[0].AddItems(new OpSlider(CEHUD.eventDisplayTime, new Vector2(220f, 375f), 100)
+            Tabs[0].AddItems(new OpSlider(CEHUD.eventDisplayTime, new Vector2(220f, 335f), 100)
             {
                 description = "Determines how long event name and description will be displayed for, when an event gets selected in seconds."
             });
 
             //Show active events checkbox
-            Tabs[0].AddItems(new OpCheckBox(RainWorldCE._showActiveEvents, new Vector2(10f, 350f)));
-            Tabs[0].AddItems(new OpLabel(45f, 350f, "Show active events")
+            Tabs[0].AddItems(new OpCheckBox(RainWorldCE._showActiveEvents, new Vector2(10f, 310f)));
+            Tabs[0].AddItems(new OpLabel(45f, 310f, "Show active events")
             { description = "Show active events in the bottom left?" });
 
             //Open in explorer button

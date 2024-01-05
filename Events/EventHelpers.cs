@@ -112,8 +112,7 @@ namespace RainWorldCE.Events
 
         internal static List<AbstractRoom> GetAllConnectedRooms(AbstractRoom room)
         {
-            Dictionary<string, AbstractRoom> rooms =new Dictionary<string, AbstractRoom>();
-            GetConnectedRooms(room).ForEach(x => rooms[x.name] = x);
+            Dictionary<string, AbstractRoom> rooms = GetConnectedRooms(room).ToDictionary(r => r.name);
             for (int i = 0; i < rooms.Count; i++)
             {
                 AbstractRoom nextRoom = rooms.ElementAt(i).Value;
