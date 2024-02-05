@@ -131,6 +131,10 @@ namespace RainWorldCE.Events
 
         private void SafePlayer()
         {
+            //Useful for figuring out how the player was killed and why the safe didn't work
+            if (RainWorldCE.debugLogs.Value)
+                WriteLog(BepInEx.Logging.LogLevel.Debug, $"{new System.Diagnostics.StackTrace()}");
+
             if (playerSaved) return;
 
             if (lastRoom.realizedRoom == null)

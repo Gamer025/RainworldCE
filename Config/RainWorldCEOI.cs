@@ -18,10 +18,12 @@ namespace RainWorldCE.Config
             RainWorldCE.eventTimeout = config.Bind("eventTimeout", 60, new ConfigAcceptableRange<int>(10, 600));
             RainWorldCE.eventTimeoutOffset = config.Bind("eventTimeoutOffset", 15, new ConfigAcceptableRange<int>(0, 600));
             RainWorldCE.blockedEventPercent = config.Bind("blockedEventPercent", 50, new ConfigAcceptableRange<int>(0, 100));
-            RainWorldCE._maxEventCount = config.Bind("maxEventCount", 200, new ConfigAcceptableRange<int>(1, 200));
+            RainWorldCE.maxEventCount = config.Bind("maxEventCount", 200, new ConfigAcceptableRange<int>(1, 200));
             RainWorldCE._eventDurationMult = config.Bind("eventDurationMult", 10, new ConfigAcceptableRange<int>(1, 50));
             CEHUD.eventDisplayTime = config.Bind("eventDisplayTime", 5, new ConfigAcceptableRange<int>(0, 15));
             RainWorldCE._showActiveEvents = config.Bind("showActiveEvents", true, new ConfigurableInfo("Show active events in the bottom left?", null, "Show active events"));
+            RainWorldCE.triggerEventKey = config.Bind("triggerEeventKey", KeyCode.None);
+            RainWorldCE.debugLogs = config.Bind("debugLogs2", false, new ConfigurableInfo("Enable extra debug logs", null, "May decrease performance"));
 
             // Enable/Disable event checkboxes
             List<Type> allEventTypes = RainWorldCE.GetAllCEEventTypes().OrderBy(x => x.Name).ToList();
@@ -69,10 +71,11 @@ namespace RainWorldCE.Config
             RainWorldCE.TryLoadCC();
             RainWorldCE.ME.Logger_p.Log(LogLevel.Info, "Remix OI init");
 
-            Tabs = new OpTab[3]; // Each OpTab is 600 x 600 pixel sized canvas
+            Tabs = new OpTab[4]; // Each OpTab is 600 x 600 pixel sized canvas
             Tabs[0] = new OpTab(this, "Main");
             Tabs[1] = new OpTab(this, "Events");
             Tabs[2] = new OpTab(this, "Event Config");
+            Tabs[3] = new OpTab(this, "Debug/Extras");
 
             //Event Duration slider
             Tabs[0].AddItems(new OpLabel(240f, 570f, "Duration between events:")
@@ -95,7 +98,7 @@ namespace RainWorldCE.Config
             //Max events slider
             Tabs[0].AddItems(new OpLabel(10f, 400f, "Max events per cycle:")
             { description = "Maximum amount of chaos events to trigger per ingame cycle." });
-            Tabs[0].AddItems(new OpSlider(RainWorldCE._maxEventCount, new Vector2(140f, 395f), 200)
+            Tabs[0].AddItems(new OpSlider(RainWorldCE.maxEventCount, new Vector2(140f, 395f), 200)
             { description = "Maximum amount of chaos events to trigger per ingame cycle." });
 
             //Event time multiplier
@@ -204,6 +207,20 @@ namespace RainWorldCE.Config
                 }
             }
             eventConfigSB.SetContentSize(sbContentSize);
+
+            //Extras/Debug
+            Tabs[3].AddItems(new OpLabel(220f, 580f, "Debug/Extra features:", bigText: true)
+            { description = "Debug and extra fun features" });
+
+            //Extra debug logs
+            Tabs[3].AddItems(new OpCheckBox(RainWorldCE.debugLogs, new Vector2(10f, 540f)));
+            Tabs[3].AddItems(new OpLabel(45f, 540f, "Enable extra debug logs")
+            { description = "Log extra debug info. Only enable when debugging the mod!\n May cause decreased performance and bigger log files" });
+            //Event trigger key
+            Tabs[3].AddItems(new OpLabel(10f, 500f, "Trigger event key:")
+            { description = "Key to trigger random event instantly" });
+            Tabs[3].AddItems(new OpKeyBinder(RainWorldCE.triggerEventKey, new Vector2(120f, 495f), new Vector2(120f, 15f), collisionCheck: false)
+            { description = "Key to trigger random event instantly" });
         }
 
         private void OpenModFolder(UIfocusable trigger)

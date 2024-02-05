@@ -7,7 +7,7 @@
 	<LangVersion>latest</LangVersion>
 	<EnableNETAnalyzers>True</EnableNETAnalyzers>
 	<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
-	  <Version>2.5.0</Version>
+	  <Version>2.5.1</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -39,6 +39,9 @@
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>..\UnityEngine.CoreModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.InputLegacyModule">
+      <HintPath>..\UnityEngine.InputLegacyModule.dll</HintPath>
     </Reference>
   </ItemGroup>
 

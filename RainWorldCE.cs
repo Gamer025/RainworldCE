@@ -12,11 +12,14 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Security.Permissions;
+using UnityEngine;
+using Random = System.Random;
+
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
 
 namespace RainWorldCE;
 
-[BepInPlugin(MOD_ID, "Rain World Chaos Edition", "2.5.0")]
+[BepInPlugin(MOD_ID, "Rain World Chaos Edition", "2.5.1")]
 public class RainWorldCE : BaseUnityPlugin
 {
     public const string MOD_ID = "Gamer025.RainworldCE";
@@ -72,8 +75,7 @@ public class RainWorldCE : BaseUnityPlugin
     /// <summary>
     /// Maximum amount of events to execute per cycle (CM)
     /// </summary>
-    static public Configurable<int> _maxEventCount;
-    static public int maxEventCount => _maxEventCount.Value;
+    static public Configurable<int> maxEventCount;
     static public Configurable<int> _eventDurationMult;
     /// <summary>
     /// Multiplier for event length
@@ -83,16 +85,25 @@ public class RainWorldCE : BaseUnityPlugin
     /// CE will only Update() (create events/call event triggers etc.) if game is active
     /// </summary>
     private static bool CEactive = false;
+    /// <summary>
+    /// Mod is running in CustomChaos mods and events are file driven
+    /// </summary>
+    public static bool CCMode = false;
+
+    //Debug/Extra
+
+    /// <summary>
+    /// Key for manually triggering a random event
+    /// </summary>
+    public static Configurable<KeyCode> triggerEventKey;
+    public static Configurable<bool> debugLogs;
+
     //Rainworld game loop
     private RainWorldGame game;
     /// <summary>
     /// BepInEx Plugin Version
     /// </summary>
     public static Version modVersion;
-    /// <summary>
-    /// Mod is running in CustomChaos mods and events are file driven
-    /// </summary>
-    public static bool CCMode = false;
 
     public static UnityEngine.AssetBundle CEAssetBundle;
     static readonly Random rnd = new Random();
@@ -113,21 +124,87 @@ public class RainWorldCE : BaseUnityPlugin
     {
         On.RainWorld.OnModsInit += OnModsInitHook;
     }
+
+    bool initDone = false;
+    private void OnModsInitHook(On.RainWorld.orig_OnModsInit orig, RainWorld self)
+    {
+        orig(self);
+        if (!initDone)
+        {
+            ME.Logger_p.Log(LogLevel.Info, "RainWorldCE init");
+            try
+            {
+                MachineConnector.SetRegisteredOI(MOD_ID, new RainWorldCEOI());
+            }
+            catch (Exception e)
+            {
+                ME.Logger_p.Log(LogLevel.Error, $"Error creating options interface:\n {e}");
+            }
+            //Used for starting up everything
+            On.RainWorldGame.ctor += RainWorldGameCtorHook;
+            //Used for key input
+            On.RainWorldGame.Update += RainWorldGameUpdateHook;
+            //Triggers for resetting CEs state
+            On.RainWorldGame.ExitGame += RainWorldGameExitGameHook;
+            On.RainWorldGame.Win += RainWorldGameWinHook;
+            //Used to pause CE on process switch (death screen ...)
+            On.ProcessManager.RequestMainProcessSwitch_ProcessID += ProcessManagerRequestMainProcessSwitchHook;
+            //Add own HUD to the game
+            On.HUD.HUD.InitSinglePlayerHud += HUDInitSinglePlayerHudHook;
+            //Needed for fixing teleports
+            On.ShortcutHandler.TeleportingCreatureArrivedInRealizedRoom += ShortcutHandler_TeleportingCreatureArrivedInRealizedRoom;
+
+            //Used for creating PostProcessing container
+            On.RoomCamera.ctor += RoomCameraExtension.RoomCameraCtorHook;
+            //Used for updating PostProcessing effects
+            On.RoomCamera.DrawUpdate += RoomCameraExtension.RoomCameraDrawUpdateHook;
+            //Used as trigger for PlayerChangingRoomTrigger
+            On.ShortcutHandler.SuckInCreature += ShortcutHandlerSuckInCreatureHook;
+            //Used as trigger for PlayerChangedRoomTrigger
+            On.RoomCamera.ChangeRoom += RoomCameraChangeRoomHook;
+
+
+            //Load asset bundle containing shaders, can only loaded once otherwise error
+            try
+            {
+                CEAssetBundle = UnityEngine.AssetBundle.LoadFromFile(AssetManager.ResolveFilePath("AssetBundles/gamer025.rainworldce.assets"));
+                if (CEAssetBundle == null)
+                {
+                    ME.Logger_p.Log(LogLevel.Error, $"RainWorldCE: Failed to load AssetBundle from {AssetManager.ResolveFilePath("AssetBundles/gamer025.rainworldce.assets")}");
+                    Destroy(this);
+                }
+                ME.Logger_p.Log(LogLevel.Debug, $"Assetbundle content: {String.Join(", ", CEAssetBundle.GetAllAssetNames())}");
+                self.Shaders.Add("FlipScreenPP", FShader.CreateShader("FlipScreenPP", CEAssetBundle.LoadAsset<UnityEngine.Shader>("flipscreen.shader")));
+                self.Shaders.Add("MeltingPP", FShader.CreateShader("MeltingPP", CEAssetBundle.LoadAsset<UnityEngine.Shader>("melt.shader")));
+                self.Shaders.Add("PixelizePP", FShader.CreateShader("PixelizePP", CEAssetBundle.LoadAsset<UnityEngine.Shader>("pixelize.shader")));
+            }
+            catch (Exception e)
+            {
+                ME.Logger_p.Log(LogLevel.Error, $"Error loading asset bundle:\n {e}");
+            }
+            initDone = true;
+        }
+    }
+
     //Start at -1 to give the game some time to start up fully
     static float timepool = -1;
+    /// <summary>
+    /// Used to drive SecondUpdate if the main game is active
+    /// Doesn't really on the games internal updates/timing
+    /// </summary>
     void Update()
     {
         //Only tick if the game seems to be running and is in story mode
         if (CEactive && game is not null && game.IsStorySession && game.pauseMenu == null && game.AllowRainCounterToTick() && game.manager.currentMainLoop is RainWorldGame)
         {
-            timepool += UnityEngine.Time.deltaTime;
+            timepool += Time.deltaTime;
             //We only need second precision, so lets only do stuff every full second
             if (timepool > 1)
             {
                 timepool--;
-                //RainWorldCE.ME.Logger_p.Log(LogLevel.Debug, $"{DateTime.Now:HH:mm:ss:fff} Calling SecondUpdate [{gameTimer}]");
+                if (debugLogs.Value)
+                    Logger_p.Log(LogLevel.Debug, $"{DateTime.Now:HH:mm:ss:fff} Calling SecondUpdate [{gameTimer}]");
                 SecondUpdate();
-                gameTimer++;
             }
             //Reset if overtiming
             if (timepool > 2)
@@ -135,6 +212,19 @@ public class RainWorldCE : BaseUnityPlugin
                 timepool = 0;
             }
         }
+    }
+
+    bool triggerEventDown = false;
+    private void RainWorldGameUpdateHook(On.RainWorldGame.orig_Update orig, RainWorldGame self)
+    {
+        orig(self);
+        bool triggerEvent = Input.GetKey(triggerEventKey.Value);
+        if (triggerEvent && !triggerEventDown)
+        {
+            Logger_p.Log(LogLevel.Info, $"Triggering event from keypress");
+            CreateNewEvent();
+        }
+        triggerEventDown = triggerEvent;
     }
 
     /// <summary>
@@ -145,7 +235,7 @@ public class RainWorldCE : BaseUnityPlugin
         Type eventClass = PickEvent();
         eventCounter++;
         CEEvent selectedEvent = (CEEvent)Activator.CreateInstance(eventClass);
-        RainWorldCE.ME.Logger_p.Log(LogLevel.Info, $"Triggering '{selectedEvent.Name}' event");
+        Logger_p.Log(LogLevel.Info, $"Triggering '{selectedEvent.Name}' event");
         ActivateEvent(selectedEvent);
     }
 
@@ -153,15 +243,15 @@ public class RainWorldCE : BaseUnityPlugin
     {
         if (ceevent.ImplementsMethod("StartupTrigger"))
         {
-            RainWorldCE.ME.Logger_p.Log(LogLevel.Debug, $"Calline StartupTrigger of '{ceevent.Name}' event");
+            ME.Logger_p.Log(LogLevel.Debug, $"Calline StartupTrigger of '{ceevent.Name}' event");
             try
             {
                 ceevent.StartupTrigger();
             }
             catch (Exception e)
             {
-                RainWorldCE.ME.Logger_p.Log(LogLevel.Error, $"'{ceevent.Name}' errored on startup, cancel event");
-                RainWorldCE.ME.Logger_p.Log(LogLevel.Error, e.ToString());
+                ME.Logger_p.Log(LogLevel.Error, $"'{ceevent.Name}' errored on startup, cancel event");
+                ME.Logger_p.Log(LogLevel.Error, e.ToString());
                 CEHUD.StopEventSelection(ceevent);
                 return;
             }
@@ -198,7 +288,7 @@ public class RainWorldCE : BaseUnityPlugin
         if (allowedEvents.Count == 0)
         {
             //Try again with normally blocked events included
-            RainWorldCE.ME.Logger_p.Log(LogLevel.Info, $"All non blocked events already active, trying again with blocked events included");
+            ME.Logger_p.Log(LogLevel.Info, $"All non blocked events already active, trying again with blocked events included");
             allowedEvents = eventTypes.ToList();
             RemoveAlreadyActiveEvents(ref allowedEvents);
         }
@@ -206,7 +296,7 @@ public class RainWorldCE : BaseUnityPlugin
         //Still can't find possible event, even with blocked events included
         if (allowedEvents.Count == 0)
         {
-            RainWorldCE.ME.Logger_p.Log(LogLevel.Warning, $"All enabled events already active, can't create new event");
+            ME.Logger_p.Log(LogLevel.Warning, $"All enabled events already active, can't create new event");
             eventClass = typeof(AllEventsFiltered);
             //Disalbe CE since we have nothign to do
             return eventClass;
@@ -218,7 +308,8 @@ public class RainWorldCE : BaseUnityPlugin
         {
             blockedEvents[blockedEventCounter] = eventClass;
             blockedEventCounter = (blockedEventCounter + 1) % blockedEvents.Length;
-            RainWorldCE.ME.Logger_p.Log(LogLevel.Debug, $"Blocked events: {String.Join(",", blockedEvents.OfType<Type>().Select(x => x.ToString()).ToArray())}");
+            if (debugLogs.Value)
+                ME.Logger_p.Log(LogLevel.Debug, $"Blocked events: {String.Join(",", blockedEvents.OfType<Type>().Select(x => x.ToString()).ToArray())}");
         }
         return eventClass;
     }
@@ -251,15 +342,15 @@ public class RainWorldCE : BaseUnityPlugin
             //Enough time has passed till last RecurringTrigger() call
             if (activeEvent.RepeatEverySec > 0 && gameTimer - activeEvent.RecurringEventTime >= activeEvent.RepeatEverySec)
             {
-                RainWorldCE.ME.Logger_p.Log(LogLevel.Debug, $"Calling RecurringTrigger of {activeEvent.Name}");
+                Logger_p.Log(LogLevel.Debug, $"Calling RecurringTrigger of {activeEvent.Name}");
                 try
                 {
                     activeEvent.RecurringTrigger();
                 }
                 catch (Exception e)
                 {
-                    RainWorldCE.ME.Logger_p.Log(LogLevel.Error, $"'{activeEvent.Name}' caused error during RecurringTrigger execution, removing event.");
-                    RainWorldCE.ME.Logger_p.Log(LogLevel.Error, e.ToString());
+                    Logger_p.Log(LogLevel.Error, $"'{activeEvent.Name}' caused error during RecurringTrigger execution, removing event.");
+                    Logger_p.Log(LogLevel.Error, e.ToString());
                     ShutdownCEEvent(activeEvent);
                 }
                 activeEvent.RecurringEventTime = gameTimer;
@@ -275,7 +366,7 @@ public class RainWorldCE : BaseUnityPlugin
         else
         {
             //Only create new event if we didn't yet reach the limit for the cycle
-            if (eventCounter < maxEventCount)
+            if (eventCounter < maxEventCount.Value)
             {
                 //Start the event selection HUD magic 3 seconds before the actual event
                 if (gameTimer - (CETriggerTime - 3) >= eventTimeout.Value + currentEventOffset)
@@ -300,6 +391,7 @@ public class RainWorldCE : BaseUnityPlugin
 
         activeEvents = activeEvents.Where(x => !x.expired).ToList();
 
+        gameTimer++;
     }
 
     /// <summary>
@@ -308,7 +400,7 @@ public class RainWorldCE : BaseUnityPlugin
     /// </summary>
     void ResetState()
     {
-        RainWorldCE.ME.Logger_p.Log(LogLevel.Debug, $"Resetting state");
+        Logger_p.Log(LogLevel.Debug, $"Resetting state");
         CEactive = false;
         gameTimer = 0;
         CETriggerTime = 0;
@@ -487,8 +579,8 @@ public class RainWorldCE : BaseUnityPlugin
                 }
                 catch (Exception e)
                 {
-                    RainWorldCE.ME.Logger_p.Log(LogLevel.Error, $"Error during '{activeEvent.Name}' PlayerChangedRoomTrigger, removing event");
-                    RainWorldCE.ME.Logger_p.Log(LogLevel.Error, e.ToString());
+                    Logger_p.Log(LogLevel.Error, $"Error during '{activeEvent.Name}' PlayerChangedRoomTrigger, removing event");
+                    Logger_p.Log(LogLevel.Error, e.ToString());
                     ShutdownCEEvent(activeEvent);
                 }
             }
@@ -523,65 +615,6 @@ public class RainWorldCE : BaseUnityPlugin
                 tVessel.creature.abstractCreature.pos = arrival;
                 tVessel.creature.SpitOutOfShortCut(arrival.Tile, tVessel.room.realizedRoom, true);
             }
-        }
-    }
-
-    bool initDone = false;
-    private void OnModsInitHook(On.RainWorld.orig_OnModsInit orig, RainWorld self)
-    {
-        orig(self);
-        if (!initDone)
-        {
-            ME.Logger_p.Log(LogLevel.Info, "RainWorldCE init");
-            try
-            {
-                MachineConnector.SetRegisteredOI(MOD_ID, new RainWorldCEOI());
-            }
-            catch (Exception e)
-            {
-                ME.Logger_p.Log(LogLevel.Error, $"Error creating options interface:\n {e}");
-            }
-            //Used for starting up everything
-            On.RainWorldGame.ctor += RainWorldGameCtorHook;
-            //Triggers for resetting CEs state
-            On.RainWorldGame.ExitGame += RainWorldGameExitGameHook;
-            On.RainWorldGame.Win += RainWorldGameWinHook;
-            //Used to pause CE on process switch (death screen ...)
-            On.ProcessManager.RequestMainProcessSwitch_ProcessID += ProcessManagerRequestMainProcessSwitchHook;
-            //Add own HUD to the game
-            On.HUD.HUD.InitSinglePlayerHud += HUDInitSinglePlayerHudHook;
-            //Needed for fixing teleports
-            On.ShortcutHandler.TeleportingCreatureArrivedInRealizedRoom += ShortcutHandler_TeleportingCreatureArrivedInRealizedRoom;
-
-            //Used for creating PostProcessing container
-            On.RoomCamera.ctor += RoomCameraExtension.RoomCameraCtorHook;
-            //Used for updating PostProcessing effects
-            On.RoomCamera.DrawUpdate += RoomCameraExtension.RoomCameraDrawUpdateHook;
-            //Used as trigger for PlayerChangingRoomTrigger
-            On.ShortcutHandler.SuckInCreature += ShortcutHandlerSuckInCreatureHook;
-            //Used as trigger for PlayerChangedRoomTrigger
-            On.RoomCamera.ChangeRoom += RoomCameraChangeRoomHook;
-
-
-            //Load asset bundle containing shaders, can only loaded once otherwise error
-            try
-            {
-                CEAssetBundle = UnityEngine.AssetBundle.LoadFromFile(AssetManager.ResolveFilePath("AssetBundles/gamer025.rainworldce.assets"));
-                if (CEAssetBundle == null)
-                {
-                    ME.Logger_p.Log(LogLevel.Error, $"RainWorldCE: Failed to load AssetBundle from {AssetManager.ResolveFilePath("AssetBundles/gamer025.rainworldce.assets")}");
-                    Destroy(this);
-                }
-                ME.Logger_p.Log(LogLevel.Debug, $"Assetbundle content: {String.Join(", ", CEAssetBundle.GetAllAssetNames())}");
-                self.Shaders.Add("FlipScreenPP", FShader.CreateShader("FlipScreenPP", CEAssetBundle.LoadAsset<UnityEngine.Shader>("flipscreen.shader")));
-                self.Shaders.Add("MeltingPP", FShader.CreateShader("MeltingPP", CEAssetBundle.LoadAsset<UnityEngine.Shader>("melt.shader")));
-                self.Shaders.Add("PixelizePP", FShader.CreateShader("PixelizePP", CEAssetBundle.LoadAsset<UnityEngine.Shader>("pixelize.shader")));
-            }
-            catch (Exception e)
-            {
-                ME.Logger_p.Log(LogLevel.Error, $"Error loading asset bundle:\n {e}");
-            }
-            initDone = true;
         }
     }
 

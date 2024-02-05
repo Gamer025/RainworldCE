@@ -20,7 +20,7 @@ namespace RainWorldCE.Events
         public override void StartupTrigger()
         {
             List<AbstractRoom> rooms = EventHelpers.GetAllConnectedRooms(EventHelpers.MainPlayer.Room);
-            WriteLog(LogLevel.Debug, $"{string.Join(",", rooms.Select(x => x.name))}");
+            WriteLog(LogLevel.Debug, $"{string.Join(",", rooms.Select(x => x.name))}", true);
             target = rooms[rnd.Next(rooms.Count)];
             _description = $"Slugcat ~ ~ ~ {target.name}";
 

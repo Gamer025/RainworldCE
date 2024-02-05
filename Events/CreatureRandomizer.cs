@@ -45,10 +45,10 @@ namespace RainWorldCE.Events
                     oldCreature.creatureTemplate.type == CreatureTemplate.Type.Deer ||
                     (oldCreature.creatureTemplate.type == MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.SlugNPC && TryGetConfigAsBool("excludePups"))) continue;
 
-                WriteLog(LogLevel.Debug, $"Found {oldCreature} , pos: {oldCreature.pos}");
+                WriteLog(LogLevel.Debug, $"Found {oldCreature} , pos: {oldCreature.pos}", true);
                 CreatureTemplate.Type type = possibleCreatures[rnd.Next(possibleCreatures.Count)];
                 AbstractCreature newCreature = new AbstractCreature(game.world, StaticWorld.GetCreatureTemplate(type), null, oldCreature.pos, game.GetNewID());
-                WriteLog(LogLevel.Debug, $"Replace creature with {newCreature}");
+                WriteLog(LogLevel.Debug, $"Replace creature with {newCreature}", true);
                 movingTo.AddEntity(newCreature);
                 newCreature.Realize();
                 newCreature.realizedCreature.PlaceInRoom(room);

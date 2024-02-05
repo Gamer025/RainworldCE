@@ -91,7 +91,6 @@ namespace RainWorldCE.RWHUD
                 //Show random event names if selection in progress
                 if (eventSelection)
                 {
-                    //RainWorldCE.ME.Logger_p.Log(LogLevel.Debug, $"Count: {eventNames.Count} Events: {String.Join(",", eventNames.ToArray())}");
                     eventNameLabel.text = eventNames[rand.Next(eventNames.Count)];
                 }
                 //Otherwise keep up the current text for around config seconds and then remove it
@@ -175,7 +174,9 @@ namespace RainWorldCE.RWHUD
             //Start from the lowest label and work our way up
             foreach (FLabel label in activeEventLabels.OrderBy(a => a.y))
             {
-                //RainWorldCE.ME.Logger_p.Log(LogLevel.Debug, $"Label {label.text} at Ypos {label.y}. Should be at {startingY + 30f * counter}");
+                if (RainWorldCE.debugLogs.Value)
+                    RainWorldCE.ME.Logger_p.Log(BepInEx.Logging.LogLevel.Debug, $"Label {label.text} at Ypos {label.y}. Should be at {startingY + 30f * counter}");
+
                 //If label not at expected y move it
                 if (label.y != startingY + 30f * counter)
                 {

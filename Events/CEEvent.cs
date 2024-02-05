@@ -125,8 +125,10 @@ namespace RainWorldCE.Events
         /// </summary>
         /// <param name="level">The log level </param>
         /// <param name="message">Message to print/log</param>
-        protected void WriteLog(LogLevel level, string message)
+        protected void WriteLog(LogLevel level, string message, bool debugLog = false)
         {
+            if (debugLog && !RainWorldCE.debugLogs.Value)
+                return;
             RainWorldCE.ME.Logger_p.Log(LogLevel.Debug, $"[{GetType().Name}] {message}");
         }
 
