@@ -15,17 +15,17 @@
 
         public override void StartupTrigger()
         {
-            On.RWInput.PlayerInput += RWInputPlayerInputHook;
+            On.RWInput.PlayerInputLogic_int_int += RWInputPlayerInputHook;
         }
 
         public override void ShutdownTrigger()
         {
-            On.RWInput.PlayerInput -= RWInputPlayerInputHook;
+            On.RWInput.PlayerInputLogic_int_int -= RWInputPlayerInputHook;
         }
 
-        public Player.InputPackage RWInputPlayerInputHook(On.RWInput.orig_PlayerInput orig, int playerNumber, RainWorld rainWorld)
+        public Player.InputPackage RWInputPlayerInputHook(On.RWInput.orig_PlayerInputLogic_int_int orig, int categoryID, int playerNumber)
         {
-            Player.InputPackage result = orig(playerNumber, rainWorld);
+            Player.InputPackage result = orig(categoryID, playerNumber);
             result.x *= -1;
             result.y *= -1;
             return result;
