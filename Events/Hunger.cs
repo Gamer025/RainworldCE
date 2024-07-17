@@ -22,12 +22,7 @@
         public override void RecurringTrigger()
         {
             if ((EventHelpers.MainPlayer.realizedCreature as Player).FoodInStomach == 0) return;
-            (EventHelpers.MainPlayer.realizedCreature as Player).AddFood(-1);
-            foreach (RoomCamera camera in game.cameras)
-            {
-                camera.hud.foodMeter.circles[(EventHelpers.MainPlayer.realizedCreature as Player).FoodInStomach].EatFade();
-                camera.hud.foodMeter.showCount--;
-            }
+            (EventHelpers.MainPlayer.realizedCreature as Player).SubtractFood(1);
         }
     }
 }
