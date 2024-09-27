@@ -26,8 +26,12 @@
         public Player.InputPackage RWInputPlayerInputHook(On.RWInput.orig_PlayerInputLogic_int_int orig, int categoryID, int playerNumber)
         {
             Player.InputPackage result = orig(categoryID, playerNumber);
-            result.x *= -1;
-            result.y *= -1;
+            //Don't invert controls in the menu
+            if (game?.pauseMenu == null)
+            {
+                result.x *= -1;
+                result.y *= -1;
+            }
             return result;
         }
     }

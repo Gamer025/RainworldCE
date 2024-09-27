@@ -19,7 +19,7 @@ using Random = System.Random;
 
 namespace RainWorldCE;
 
-[BepInPlugin(MOD_ID, "Rain World Chaos Edition", "2.5.3")]
+[BepInPlugin(MOD_ID, "Rain World Chaos Edition", "2.5.4")]
 public class RainWorldCE : BaseUnityPlugin
 {
     public const string MOD_ID = "Gamer025.RainworldCE";
