@@ -21,7 +21,7 @@ namespace RainWorldCE.Events
             List<AbstractRoom> adjacendRooms = EventHelpers.GetConnectedRooms(EventHelpers.CurrentRoom);
             AbstractRoom sourceRoom = adjacendRooms[rnd.Next(adjacendRooms.Count)];
             int destRoomNodeId = EventHelpers.GetNodeIdOfRoomConnection(sourceRoom, EventHelpers.CurrentRoom);
-            if (creatureType == CreatureTemplate.Type.Vulture || creatureType == MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.MirosVulture)
+            if (creatureType == CreatureTemplate.Type.Vulture || creatureType == DLCSharedEnums.CreatureTemplateType.MirosVulture)
             {
                 sourceRoom = game.world.offScreenDen;
                 for (int i = 0; i < EventHelpers.CurrentRoom.realizedRoom.borderExits.Length; i++)
@@ -46,7 +46,7 @@ namespace RainWorldCE.Events
                 EventHelpers.MakeCreatureAttackCreature(creature, EventHelpers.MainPlayer);
                 creature.ChangeRooms(new WorldCoordinate(EventHelpers.CurrentRoom.index, -1, -1, destRoomNodeId));
                 WriteLog(LogLevel.Debug, $"Spawned: {creature}");
-                if (creatureType == MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.Inspector)
+                if (creatureType == DLCSharedEnums.CreatureTemplateType.Inspector)
                 {
                     creature.abstractAI.RealAI.preyTracker.AddPrey(creature.abstractAI.RealAI.tracker.RepresentationForCreature(EventHelpers.MainPlayer, true));
                     (creature.realizedCreature as MoreSlugcats.Inspector).anger = 1.0f;
@@ -66,13 +66,13 @@ namespace RainWorldCE.Events
                         case < 10:
                             return CreatureTemplate.Type.GreenLizard;
                         case < 20:
-                            return MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.EelLizard;
+                            return DLCSharedEnums.CreatureTemplateType.EelLizard;
                         case < 30:
                             return CreatureTemplate.Type.PinkLizard;
                         case < 40:
-                            return MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.SpitLizard;
+                            return DLCSharedEnums.CreatureTemplateType.SpitLizard;
                         case < 50:
-                            return MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.ZoopLizard;
+                            return DLCSharedEnums.CreatureTemplateType.ZoopLizard;
                         case < 60:
                             return CreatureTemplate.Type.BlueLizard;
                         case < 70:
@@ -130,7 +130,7 @@ namespace RainWorldCE.Events
                         case < 30:
                             return CreatureTemplate.Type.BigSpider;
                         case < 40:
-                            return MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.MotherSpider;
+                            return DLCSharedEnums.CreatureTemplateType.MotherSpider;
                         case < 50:
                             if (allowFlying) return CreatureTemplate.Type.Vulture;
                             else return RandomCreature();
@@ -141,15 +141,15 @@ namespace RainWorldCE.Events
                         case < 80:
                             return CreatureTemplate.Type.Centiwing;
                         case < 87:
-                            return MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.ScavengerElite;
+                            return DLCSharedEnums.CreatureTemplateType.ScavengerElite;
                         case < 95:
                             return MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.FireBug;
                         case < 101:
-                            return MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.Inspector;
+                            return DLCSharedEnums.CreatureTemplateType.Inspector;
                         case < 108:
                             return CreatureTemplate.Type.MirosBird;
                         case < 114:
-                            if (allowFlying) return MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.MirosVulture;
+                            if (allowFlying) return DLCSharedEnums.CreatureTemplateType.MirosVulture;
                             else return RandomCreature();
                         case >= 114:
                             return CreatureTemplate.Type.RedCentipede;

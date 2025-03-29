@@ -19,7 +19,7 @@ using Random = System.Random;
 
 namespace RainWorldCE;
 
-[BepInPlugin(MOD_ID, "Rain World Chaos Edition", "2.5.4")]
+[BepInPlugin(MOD_ID, "Rain World Chaos Edition", "3.0.0")]
 public class RainWorldCE : BaseUnityPlugin
 {
     public const string MOD_ID = "Gamer025.RainworldCE";
@@ -508,10 +508,10 @@ public class RainWorldCE : BaseUnityPlugin
         orig(self, asDeath, asQuit);
     }
 
-    void RainWorldGameWinHook(On.RainWorldGame.orig_Win orig, RainWorldGame self, bool malnourished)
+    void RainWorldGameWinHook(On.RainWorldGame.orig_Win orig, RainWorldGame self, bool malnourished, bool fromWarpPoint)
     {
         ResetState();
-        orig(self, malnourished);
+        orig(self, malnourished, fromWarpPoint);
     }
 
     void ProcessManagerRequestMainProcessSwitchHook(On.ProcessManager.orig_RequestMainProcessSwitch_ProcessID orig, ProcessManager self, ProcessManager.ProcessID ID)

@@ -32,7 +32,7 @@ namespace RainWorldCE.Events
             if (ModManager.MSC)
             {
                 physicalObjects.Add(MoreSlugcatsEnums.AbstractObjectType.FireEgg);
-                physicalObjects.Add(MoreSlugcatsEnums.AbstractObjectType.SingularityBomb);
+                physicalObjects.Add(DLCSharedEnums.AbstractObjectType.SingularityBomb);
             }
 
             foreach (AbstractCreature player in EventHelpers.AllPlayers)

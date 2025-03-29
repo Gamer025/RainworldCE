@@ -62,7 +62,7 @@ namespace RainWorldCE.Events
                             switch (rnd.Next(20))
                             {
                                 case < 7:
-                                    reward = new AbstractConsumable(game.world, MoreSlugcats.MoreSlugcatsEnums.AbstractObjectType.GooieDuck, null, player.pos, game.GetNewID(), -1, -1, null);
+                                    reward = new AbstractConsumable(game.world, DLCSharedEnums.AbstractObjectType.GooieDuck, null, player.pos, game.GetNewID(), -1, -1, null);
                                     break;
                                 case < 12:
                                     reward = new AbstractPhysicalObject(game.world, AbstractPhysicalObject.AbstractObjectType.ScavengerBomb, null, player.pos, game.GetNewID());
@@ -86,7 +86,7 @@ namespace RainWorldCE.Events
                                     reward = new AbstractCreature(game.world, StaticWorld.GetCreatureTemplate(CreatureTemplate.Type.TubeWorm), null, player.pos, game.GetNewID());
                                     break;
                                 case <= 17:
-                                    reward = new AbstractPhysicalObject(game.world, MoreSlugcats.MoreSlugcatsEnums.AbstractObjectType.SingularityBomb, null, player.pos, game.GetNewID());
+                                    reward = new AbstractPhysicalObject(game.world, DLCSharedEnums.AbstractObjectType.SingularityBomb, null, player.pos, game.GetNewID());
                                     reward.realizedObject = new MoreSlugcats.SingularityBomb(reward, game.world)
                                     {
                                         zeroMode = true,

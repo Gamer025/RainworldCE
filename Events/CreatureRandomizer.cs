@@ -31,7 +31,7 @@ namespace RainWorldCE.Events
             possibleCreatures.Remove(CreatureTemplate.Type.GarbageWorm);
             if (ModManager.MSC)
             {
-                possibleCreatures.Remove(MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.StowawayBug);
+                possibleCreatures.Remove(DLCSharedEnums.CreatureTemplateType.StowawayBug);
                 if (TryGetConfigAsBool("excludePups"))
                     possibleCreatures.Remove(MoreSlugcats.MoreSlugcatsEnums.CreatureTemplateType.SlugNPC);
             }
