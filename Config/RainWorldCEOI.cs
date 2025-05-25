@@ -24,6 +24,7 @@ namespace RainWorldCE.Config
             RainWorldCE._showActiveEvents = config.Bind("showActiveEvents", true, new ConfigurableInfo("Show active events in the bottom left?", null, "Show active events"));
             RainWorldCE.triggerEventKey = config.Bind("triggerEeventKey", KeyCode.None);
             RainWorldCE.debugLogs = config.Bind("debugLogs2", false, new ConfigurableInfo("Enable extra debug logs", null, "May decrease performance"));
+            RainWorldCE.eventSeed = config.Bind("eventSeed", 0, new ConfigAcceptableRange<int>(0, Int32.MaxValue));
 
             // Enable/Disable event checkboxes
             List<Type> allEventTypes = RainWorldCE.GetAllCEEventTypes().OrderBy(x => x.Name).ToList();
@@ -62,6 +63,10 @@ namespace RainWorldCE.Config
         /// All CEEvents defined in code
         /// </summary>
         List<CEEvent> allCEEvents;
+        /// <summary>
+        /// OI textbox with seed for event generation
+        /// </summary>
+        OpTextBox seedTb;
 
         public static Dictionary<string, Configurable<bool>> eventStatus = new Dictionary<string, Configurable<bool>>();
 
@@ -221,11 +226,37 @@ namespace RainWorldCE.Config
             { description = "Key to trigger random event instantly" });
             Tabs[3].AddItems(new OpKeyBinder(RainWorldCE.triggerEventKey, new Vector2(120f, 495f), new Vector2(120f, 15f), collisionCheck: false)
             { description = "Key to trigger random event instantly" });
+            //Event Seed
+            seedTb = new OpTextBox(RainWorldCE.eventSeed, new Vector2(160f, 447f), 100)
+            { description = "Set a static seed that will be used for event selection, so rolled events will always be the same when starting/continuing run from the menu.\nSet to 0 to disable/select events randomly instead" };
+            Tabs[3].AddItems(seedTb);
+            Tabs[3].AddItems(new OpLabel(10f, 450f, "Seed for event selection:")
+            { description = "Set a static seed that will be used for event selection, so rolled events will always be the same when starting/continuing run from the menu.\nSet to 0 to disable/select events randomly instead" });
+            OpSimpleButton generateSeed = new OpSimpleButton(new Vector2(270, 445f), new Vector2(100, 30f), "Generate seed")
+            {
+                description = "Generate a random number and set it as event seed."
+            };
+            generateSeed.OnClick += GenerateRandomSeed;
+            Tabs[3].AddItems(generateSeed);
+            OpSimpleButton resetSeed = new OpSimpleButton(new Vector2(380, 445f), new Vector2(100, 30f), "Reset seed")
+            {
+                description = "Reset seed to 0 / disable seeded run"
+            };
+            resetSeed.OnClick += ResetSeed;
+            Tabs[3].AddItems(resetSeed);
         }
 
         private void OpenModFolder(UIfocusable trigger)
         {
             Application.OpenURL($"file://{Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "..")}");
+        }
+        private void GenerateRandomSeed(UIfocusable trigger)
+        {
+            seedTb.valueInt = UnityEngine.Random.Range(1, Int32.MaxValue);
+        }
+        private void ResetSeed(UIfocusable trigger)
+        {
+            seedTb.valueInt = 0;
         }
     }
 }

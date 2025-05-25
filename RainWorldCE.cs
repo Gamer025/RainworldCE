@@ -1,5 +1,7 @@
 ﻿using BepInEx;
 using BepInEx.Logging;
+using IL.Menu;
+using Menu;
 using RainWorldCE.Attributes;
 using RainWorldCE.Config;
 using RainWorldCE.Config.CustomChaos;
@@ -19,7 +21,7 @@ using Random = System.Random;
 
 namespace RainWorldCE;
 
-[BepInPlugin(MOD_ID, "Rain World Chaos Edition", "3.0.0")]
+[BepInPlugin(MOD_ID, "Rain World Chaos Edition", "3.1.0")]
 public class RainWorldCE : BaseUnityPlugin
 {
     public const string MOD_ID = "Gamer025.RainworldCE";
@@ -89,6 +91,10 @@ public class RainWorldCE : BaseUnityPlugin
     /// Mod is running in CustomChaos mods and events are file driven
     /// </summary>
     public static bool CCMode = false;
+    /// <summary>
+    /// Current active seed for current cycle if seeded run, will advanced by 1000 for every cycle in current run
+    /// </summary>
+    static int currentSeed = -1;
 
     //Debug/Extra
 
@@ -96,7 +102,15 @@ public class RainWorldCE : BaseUnityPlugin
     /// Key for manually triggering a random event
     /// </summary>
     public static Configurable<KeyCode> triggerEventKey;
+    /// <summary>
+    /// Write additional noisy debug logs
+    /// </summary>
     public static Configurable<bool> debugLogs;
+    /// <summary>
+    /// Optional set seed for event selection
+    /// </summary>
+    static public Configurable<int> eventSeed;
+
 
     //Rainworld game loop
     private RainWorldGame game;
@@ -106,7 +120,7 @@ public class RainWorldCE : BaseUnityPlugin
     public static Version modVersion;
 
     public static UnityEngine.AssetBundle CEAssetBundle;
-    static readonly Random rnd = new Random();
+    static  Random rnd = new Random();
 
     public RainWorldCE()
     {
@@ -460,6 +474,13 @@ public class RainWorldCE : BaseUnityPlugin
     void RainWorldGameCtorHook(On.RainWorldGame.orig_ctor orig, RainWorldGame self, ProcessManager manager)
     {
         orig(self, manager);
+
+        if (currentSeed != -1)
+        {
+            ME.Logger_p.Log(LogLevel.Info, $"Seeding event cycle with {currentSeed} as seed");
+            rnd = new Random(currentSeed);
+        }
+
         TryLoadCC();
         ME.Logger_p.Log(LogLevel.Info, $"Starting event cycle with {eventTimeout.Value} second timer");
         ResetState();
@@ -521,6 +542,29 @@ public class RainWorldCE : BaseUnityPlugin
             CEactive = false;
         else
             CEactive = true;
+
+        //Make sure seed is inactive, for exampel after settings where changed
+        if (eventSeed.Value == 0)
+            currentSeed = -1;
+
+        //Increment seed so multiple cycles in one run aren't the same after karma screen
+        if (self.currentMainLoop is Menu.KarmaLadderScreen && currentSeed != -1)
+        {
+            ME.Logger_p.Log(LogLevel.Info, $"Incrementing currentSeed by 1000, currently at {currentSeed}");
+            currentSeed = Math.Min(currentSeed + 1000, int.MaxValue);
+        }
+        else if (eventSeed.Value != 0 && ID == ProcessManager.ProcessID.Game)
+        {
+            currentSeed = eventSeed.Value;
+        }
+        //Blocked events always get reset each cycle in seeded runs for consistency
+        if (currentSeed != -1 && ID == ProcessManager.ProcessID.Game)
+        {
+            ME.Logger_p.Log(LogLevel.Info, $"Resetting blocked events because seeded run");
+            if (blockedEvents is not null)
+                Array.Clear(blockedEvents, 0, blockedEvents.Length);
+            blockedEventCounter = 0;
+        }
         orig(self, ID);
     }
 
